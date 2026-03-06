@@ -43,7 +43,21 @@
             <el-tag :type="getStatusType(row.status)" class="tag-glow">{{ row.status }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="hrContact" label="HR联系方式" min-width="120" />
+        <el-table-column label="投递链接" min-width="120">
+          <template #default="{ row }">
+            <el-button
+              v-if="row.applyLink"
+              size="small"
+              type="primary"
+              link
+              @click="openLink(row.applyLink)"
+            >
+              <el-icon><Link /></el-icon>
+              查看进度
+            </el-button>
+            <span v-else class="text-muted">未设置</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="remark" label="备注" min-width="150" show-overflow-tooltip />
         <el-table-column label="操作" width="220" fixed="right">
           <template #default="{ row }">
@@ -92,8 +106,8 @@
             <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
           </el-select>
         </el-form-item>
-        <el-form-item label="HR联系方式">
-          <el-input v-model="form.hrContact" placeholder="请输入HR联系方式" />
+        <el-form-item label="投递链接">
+          <el-input v-model="form.applyLink" placeholder="请输入投递网站链接（如：https://..." />
         </el-form-item>
         <el-form-item label="备注">
           <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="请输入备注" />
@@ -115,7 +129,19 @@
         <el-descriptions-item label="状态">
           <el-tag :type="getStatusType(detailData.status)" class="tag-glow">{{ detailData.status }}</el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="HR联系方式">{{ detailData.hrContact }}</el-descriptions-item>
+        <el-descriptions-item label="投递链接">
+            <el-button
+              v-if="detailData.applyLink"
+              size="small"
+              type="primary"
+              link
+              @click="openLink(detailData.applyLink)"
+            >
+              <el-icon><Link /></el-icon>
+              {{ detailData.applyLink }}
+            </el-button>
+            <span v-else>未设置</span>
+          </el-descriptions-item>
         <el-descriptions-item label="备注" :span="2">{{ detailData.remark || '无' }}</el-descriptions-item>
       </el-descriptions>
 
@@ -286,7 +312,7 @@ const form = reactive({
   jobType: '',
   applyDate: '',
   status: '待处理',
-  hrContact: '',
+  applyLink: '',
   remark: ''
 })
 
@@ -354,6 +380,13 @@ const getResultType = (result) => {
   return map[result] || 'info'
 }
 
+// 打开投递链接
+const openLink = (url) => {
+  if (url) {
+    window.open(url, '_blank')
+  }
+}
+
 const fetchData = async () => {
   try {
     const response = await applicationApi.list({
@@ -390,7 +423,7 @@ const openDialog = (row) => {
       jobType: row.jobType,
       applyDate: row.applyDate,
       status: row.status,
-      hrContact: row.hrContact,
+      applyLink: row.applyLink,
       remark: row.remark
     })
   } else {
@@ -401,7 +434,7 @@ const openDialog = (row) => {
       jobType: '',
       applyDate: '',
       status: '待处理',
-      hrContact: '',
+      applyLink: '',
       remark: ''
     })
   }
@@ -705,5 +738,11 @@ onMounted(() => {
 :deep(.el-table__header-row),
 :deep(.el-table__header-row *) {
   transition: none !important;
+}
+
+/* 投递链接样式 */
+.text-muted {
+  color: var(--text-muted);
+  font-size: 13px;
 }
 </style>
