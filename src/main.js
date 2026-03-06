@@ -6,6 +6,10 @@ import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import App from './App.vue'
 import router from './router'
 
+// 导入自定义样式
+import './styles/variables.css'
+import './styles/transitions.css'
+
 const app = createApp(App)
 
 // 注册所有图标

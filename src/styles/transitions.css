@@ -1,0 +1,218 @@
+/* 页面淡入淡出 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* 滑动淡入 - 从左 */
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-left-enter-from {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.slide-left-leave-to {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+/* 列表项交错入场动画 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.list-enter-active {
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+.list-leave-active {
+  transition: all 0.3s ease;
+}
+
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+/* 卡片悬浮效果 */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* 按钮点击反馈 */
+.btn-click:active {
+  transform: scale(0.96);
+}
+
+/* 数字计数动画 */
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.number-animate {
+  animation: countUp 0.6s ease forwards;
+}
+
+/* 图标旋转动画 */
+@keyframes iconRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.icon-hover:hover .el-icon {
+  animation: iconRotate 0.6s ease;
+}
+
+/* 脉冲动画 - 用于提示关注 */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.pulse-animation {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* 边框发光效果 */
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--primary-color);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--primary-color), 0 0 30px var(--primary-light);
+  }
+}
+
+.glow-effect {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* 对话框入场动画 */
+.dialog-enter-active {
+  animation: dialogIn 0.3s ease;
+}
+
+.dialog-leave-active {
+  animation: dialogOut 0.2s ease;
+}
+
+@keyframes dialogIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes dialogOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+}
+
+/* 菜单项悬浮动画 */
+.menu-item-hover {
+  transition: all 0.25s ease;
+}
+
+.menu-item-hover:hover {
+  padding-left: 24px !important;
+  background: var(--bg-glass);
+}
+
+/* 标签发光效果 */
+.tag-glow {
+  transition: all 0.3s ease;
+}
+
+.tag-glow:hover {
+  box-shadow: 0 0 10px currentColor;
+  transform: scale(1.05);
+}
+
+/* 输入框聚焦动画 */
+.input-focus .el-input__wrapper {
+  transition: all 0.3s ease;
+}
+
+.input-focus .el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--primary-light) inset;
+}
+
+.input-focus .el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 2px var(--primary-color) inset;
+}
+
+/* 表格行悬浮动画 */
+.table-row-hover {
+  transition: all 0.2s ease;
+}
+
+.table-row-hover:hover {
+  background: var(--bg-glass) !important;
+}
+
+/* 骨架屏动画 */
+@keyframes skeleton {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-glass) 50%, var(--bg-secondary) 75%);
+  background-size: 200px 100%;
+  animation: skeleton 1.5s ease-in-out infinite;
+}
+
+/* 主题切换过渡 */
+.theme-transition * {
+  transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease !important;
+}

@@ -2,16 +2,16 @@
   <div class="application-list">
     <div class="page-header">
       <h2>投递列表</h2>
-      <el-button type="primary" @click="openDialog()">
+      <el-button type="primary" class="add-btn" @click="openDialog()">
         <el-icon><Plus /></el-icon>
         新增投递
       </el-button>
     </div>
 
     <!-- 搜索栏 -->
-    <el-card class="search-card">
+    <el-card class="search-card card-hover">
       <el-form :inline="true">
-        <el-form-item label="公司名称">
+        <el-form-item label="公司名称" class="input-focus">
           <el-input
             v-model="searchForm.companyName"
             placeholder="请输入公司名称"
@@ -19,28 +19,28 @@
             @keyup.enter="handleSearch"
           />
         </el-form-item>
-        <el-form-item label="状态">
+        <el-form-item label="状态" class="input-focus">
           <el-select v-model="searchForm.status" placeholder="全部状态" clearable style="width: 140px">
             <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
-          <el-button @click="resetSearch">重置</el-button>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+          <el-button class="reset-btn" @click="resetSearch">重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
     <!-- 列表 -->
-    <el-card class="table-card">
-      <el-table :data="tableData" stripe style="width: 100%">
+    <el-card class="table-card card-hover">
+      <el-table :data="tableData" stripe class="custom-table">
         <el-table-column prop="companyName" label="公司名称" min-width="120" />
         <el-table-column prop="position" label="岗位" min-width="120" />
         <el-table-column prop="jobType" label="类型" width="80" />
         <el-table-column prop="applyDate" label="投递日期" width="110" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="getStatusType(row.status)">{{ row.status }}</el-tag>
+            <el-tag :type="getStatusType(row.status)" class="tag-glow">{{ row.status }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="hrContact" label="HR联系方式" min-width="120" />
@@ -48,9 +48,9 @@
         <el-table-column label="操作" width="190" fixed="right">
           <template #default="{ row }">
             <div class="action-buttons">
-              <el-button size="small" type="primary" plain @click="viewDetail(row)">详情</el-button>
-              <el-button size="small" type="primary" @click="openDialog(row)">编辑</el-button>
-              <el-button size="small" type="danger" plain @click="handleDelete(row)">删除</el-button>
+              <el-button size="small" type="primary" plain class="btn-click" @click="viewDetail(row)">详情</el-button>
+              <el-button size="small" type="primary" class="btn-click" @click="openDialog(row)">编辑</el-button>
+              <el-button size="small" type="danger" plain class="btn-click" @click="handleDelete(row)">删除</el-button>
             </div>
           </template>
         </el-table-column>
@@ -70,7 +70,7 @@
     </el-card>
 
     <!-- 新增/编辑对话框 -->
-    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑投递' : '新增投递'" width="550px">
+    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑投递' : '新增投递'" width="550px" class="dialog-card">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="公司名称" prop="companyName">
           <el-input v-model="form.companyName" placeholder="请输入公司名称" />
@@ -101,19 +101,19 @@
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
+        <el-button type="primary" class="submit-btn" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
 
     <!-- 详情对话框 -->
-    <el-dialog v-model="detailVisible" title="投递详情" width="900px">
+    <el-dialog v-model="detailVisible" title="投递详情" width="900px" class="dialog-card">
       <el-descriptions :column="2" border>
         <el-descriptions-item label="公司名称">{{ detailData.companyName }}</el-descriptions-item>
         <el-descriptions-item label="岗位">{{ detailData.position }}</el-descriptions-item>
         <el-descriptions-item label="类型">{{ detailData.jobType }}</el-descriptions-item>
         <el-descriptions-item label="投递日期">{{ detailData.applyDate }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="getStatusType(detailData.status)">{{ detailData.status }}</el-tag>
+          <el-tag :type="getStatusType(detailData.status)" class="tag-glow">{{ detailData.status }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="HR联系方式">{{ detailData.hrContact }}</el-descriptions-item>
         <el-descriptions-item label="备注" :span="2">{{ detailData.remark || '无' }}</el-descriptions-item>
@@ -131,7 +131,7 @@
           <el-table-column prop="platform" label="平台" width="100" />
           <el-table-column prop="result" label="结果" width="80">
             <template #default="{ row }">
-              <el-tag :type="getResultType(row.result)" size="small">{{ row.result }}</el-tag>
+              <el-tag :type="getResultType(row.result)" size="small" class="tag-glow">{{ row.result }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="questions" label="题目" show-overflow-tooltip />
@@ -162,7 +162,7 @@
           <el-table-column prop="interviewer" label="面试官" width="100" />
           <el-table-column prop="result" label="结果" width="80">
             <template #default="{ row }">
-              <el-tag :type="getResultType(row.result)" size="small">{{ row.result }}</el-tag>
+              <el-tag :type="getResultType(row.result)" size="small" class="tag-glow">{{ row.result }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="questions" label="问题" show-overflow-tooltip />
@@ -180,7 +180,7 @@
     </el-dialog>
 
     <!-- 笔试记录对话框 -->
-    <el-dialog v-model="writtenTestDialogVisible" :title="editingWrittenTestId ? '编辑笔试' : '新增笔试'" width="550px">
+    <el-dialog v-model="writtenTestDialogVisible" :title="editingWrittenTestId ? '编辑笔试' : '新增笔试'" width="550px" class="dialog-card">
       <el-form ref="writtenTestFormRef" :model="writtenTestForm" label-width="100px">
         <el-form-item label="笔试日期">
           <el-date-picker v-model="writtenTestForm.testDate" type="date" placeholder="选择日期" value-format="YYYY-MM-DD" style="width: 100%" />
@@ -210,12 +210,12 @@
       </el-form>
       <template #footer>
         <el-button @click="writtenTestDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitWrittenTest">确定</el-button>
+        <el-button type="primary" class="submit-btn" @click="submitWrittenTest">确定</el-button>
       </template>
     </el-dialog>
 
     <!-- 面试记录对话框 -->
-    <el-dialog v-model="interviewDialogVisible" :title="editingInterviewId ? '编辑面试' : '新增面试'" width="550px">
+    <el-dialog v-model="interviewDialogVisible" :title="editingInterviewId ? '编辑面试' : '新增面试'" width="550px" class="dialog-card">
       <el-form ref="interviewFormRef" :model="interviewForm" label-width="100px">
         <el-form-item label="面试轮次">
           <el-input-number v-model="interviewForm.round" :min="1" :max="10" />
@@ -252,7 +252,7 @@
       </el-form>
       <template #footer>
         <el-button @click="interviewDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitInterview">确定</el-button>
+        <el-button type="primary" class="submit-btn" @click="submitInterview">确定</el-button>
       </template>
     </el-dialog>
   </div>
@@ -334,6 +334,7 @@ const interviewForm = reactive({
 const getStatusType = (status) => {
   const map = {
     '待处理': 'info',
+    '流程中': 'success',
     '测评中': 'warning',
     '笔试中': 'warning',
     '面试中': 'primary',
@@ -601,22 +602,43 @@ onMounted(() => {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-primary);
 }
 
-.page-header .el-button {
-  border-radius: 10px;
+.add-btn {
+  background: var(--primary-gradient);
+  border: none;
+  border-radius: var(--radius-sm);
+}
+
+.add-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .search-card {
   margin-bottom: 20px;
+  border: none !important;
+  border-radius: var(--radius-lg) !important;
+  background: var(--bg-card) !important;
+  backdrop-filter: var(--glass-blur);
+}
+
+.search-btn {
+  background: var(--primary-gradient);
   border: none;
-  border-radius: 16px;
+}
+
+.reset-btn {
+  border-color: var(--border-color);
 }
 
 .table-card {
-  border: none;
-  border-radius: 16px;
+  border: none !important;
+  border-radius: var(--radius-lg) !important;
+  background: var(--bg-card) !important;
+  backdrop-filter: var(--glass-blur);
 }
 
 .pagination-wrapper {
@@ -633,5 +655,46 @@ onMounted(() => {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+/* 对话框样式 */
+.dialog-card .el-dialog {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.dialog-card :deep(.el-dialog__header) {
+  background: var(--primary-gradient);
+  padding: 16px 20px;
+  margin: 0;
+}
+
+.dialog-card :deep(.el-dialog__title) {
+  color: white;
+  font-weight: 600;
+}
+
+.dialog-card :deep(.el-dialog__headerbtn .el-dialog__close) {
+  color: white;
+}
+
+.dialog-card :deep(.el-dialog__body) {
+  padding: 24px;
+  background: var(--bg-card);
+}
+
+.dialog-card :deep(.el-dialog__footer) {
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-color);
+  padding: 16px 20px;
+}
+
+.submit-btn {
+  background: var(--primary-gradient);
+  border: none;
+}
+
+.submit-btn:hover {
+  opacity: 0.9;
 }
 </style>
