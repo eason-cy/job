@@ -698,4 +698,12 @@ onMounted(() => {
 .submit-btn:hover {
   opacity: 0.9;
 }
+
+/* 修复：禁用表格行的全局主题过渡，避免对话框关闭时的刷新感 */
+:deep(.el-table__row),
+:deep(.el-table__row *),
+:deep(.el-table__header-row),
+:deep(.el-table__header-row *) {
+  transition: none !important;
+}
 </style>
