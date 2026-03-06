@@ -70,7 +70,7 @@
     </el-card>
 
     <!-- 新增/编辑对话框 -->
-    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑投递' : '新增投递'" width="550px" class="dialog-card">
+    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑投递' : '新增投递'" width="550px" class="dialog-card" destroy-on-close>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="公司名称" prop="companyName">
           <el-input v-model="form.companyName" placeholder="请输入公司名称" />
@@ -106,7 +106,7 @@
     </el-dialog>
 
     <!-- 详情对话框 -->
-    <el-dialog v-model="detailVisible" title="投递详情" width="900px" class="dialog-card">
+    <el-dialog v-model="detailVisible" title="投递详情" width="900px" class="dialog-card" destroy-on-close>
       <el-descriptions :column="2" border>
         <el-descriptions-item label="公司名称">{{ detailData.companyName }}</el-descriptions-item>
         <el-descriptions-item label="岗位">{{ detailData.position }}</el-descriptions-item>
@@ -180,7 +180,7 @@
     </el-dialog>
 
     <!-- 笔试记录对话框 -->
-    <el-dialog v-model="writtenTestDialogVisible" :title="editingWrittenTestId ? '编辑笔试' : '新增笔试'" width="550px" class="dialog-card">
+    <el-dialog v-model="writtenTestDialogVisible" :title="editingWrittenTestId ? '编辑笔试' : '新增笔试'" width="550px" class="dialog-card" destroy-on-close>
       <el-form ref="writtenTestFormRef" :model="writtenTestForm" label-width="100px">
         <el-form-item label="笔试日期">
           <el-date-picker v-model="writtenTestForm.testDate" type="date" placeholder="选择日期" value-format="YYYY-MM-DD" style="width: 100%" />
@@ -215,7 +215,7 @@
     </el-dialog>
 
     <!-- 面试记录对话框 -->
-    <el-dialog v-model="interviewDialogVisible" :title="editingInterviewId ? '编辑面试' : '新增面试'" width="550px" class="dialog-card">
+    <el-dialog v-model="interviewDialogVisible" :title="editingInterviewId ? '编辑面试' : '新增面试'" width="550px" class="dialog-card" destroy-on-close>
       <el-form ref="interviewFormRef" :model="interviewForm" label-width="100px">
         <el-form-item label="面试轮次">
           <el-input-number v-model="interviewForm.round" :min="1" :max="10" />

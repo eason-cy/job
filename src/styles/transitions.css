@@ -123,12 +123,12 @@
   animation: glow 2s ease-in-out infinite;
 }
 
-/* 对话框入场动画 */
-.dialog-enter-active {
+/* 对话框入场动画 - 重命名避免与 Element Plus 冲突 */
+.custom-dialog-enter-active {
   animation: dialogIn 0.3s ease;
 }
 
-.dialog-leave-active {
+.custom-dialog-leave-active {
   animation: dialogOut 0.2s ease;
 }
 
@@ -212,7 +212,7 @@
   animation: skeleton 1.5s ease-in-out infinite;
 }
 
-/* 主题切换过渡 */
-.theme-transition * {
+/* 主题切换过渡 - 暂时禁用，因为会影响对话框关闭动画 */
+/* .theme-transition * {
   transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease !important;
-}
+} */
