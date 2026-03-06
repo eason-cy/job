@@ -45,7 +45,7 @@
         </el-table-column>
         <el-table-column prop="hrContact" label="HR联系方式" min-width="120" />
         <el-table-column prop="remark" label="备注" min-width="150" show-overflow-tooltip />
-        <el-table-column label="操作" width="190" fixed="right">
+        <el-table-column label="操作" width="220" fixed="right">
           <template #default="{ row }">
             <div class="action-buttons">
               <el-button size="small" type="primary" plain class="btn-click" @click="viewDetail(row)">详情</el-button>
@@ -653,8 +653,9 @@ onMounted(() => {
 
 .action-buttons {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
+  flex-wrap: nowrap;
 }
 
 /* 对话框样式 */
