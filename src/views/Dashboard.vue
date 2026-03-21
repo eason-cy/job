@@ -236,20 +236,35 @@ const handleThemeChange = () => {
   renderPieChart()
 }
 
+let themeObserver = null
+
 onMounted(() => {
   fetchStatistics()
   // 监听主题变化
-  const observer = new MutationObserver(handleThemeChange)
-  observer.observe(document.documentElement, {
+  themeObserver = new MutationObserver(handleThemeChange)
+  themeObserver.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['data-theme']
   })
+  // 监听窗口大小变化，重绘图表
+  window.addEventListener('resize', handleResize)
 })
+
+// 窗口大小变化时重绘图表
+const handleResize = () => {
+  if (pieChart) {
+    pieChart.resize()
+  }
+}
 
 onUnmounted(() => {
   if (pieChart) {
     pieChart.dispose()
   }
+  if (themeObserver) {
+    themeObserver.disconnect()
+  }
+  window.removeEventListener('resize', handleResize)
 })
 </script>
 

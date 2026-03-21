@@ -40,7 +40,22 @@
         <el-table-column prop="applyDate" label="投递日期" width="110" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="getStatusType(row.status)" class="tag-glow">{{ row.status }}</el-tag>
+            <el-dropdown trigger="click" @command="(cmd) => handleStatusChange(row, cmd)">
+              <el-tag :type="getStatusType(row.status)" class="status-tag-clickable">
+                {{ row.status }}
+              </el-tag>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item
+                    v-for="item in statusOptions"
+                    :key="item"
+                    :command="item"
+                  >
+                    <el-tag :type="getStatusType(item)" size="small">{{ item }}</el-tag>
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </template>
         </el-table-column>
         <el-table-column label="投递链接" min-width="120">
@@ -360,7 +375,7 @@ const interviewForm = reactive({
 const getStatusType = (status) => {
   const map = {
     '待处理': 'info',
-    '流程中': 'success',
+    '流程中': 'primary',
     '测评中': 'warning',
     '笔试中': 'warning',
     '面试中': 'primary',
@@ -384,6 +399,19 @@ const getResultType = (result) => {
 const openLink = (url) => {
   if (url) {
     window.open(url, '_blank')
+  }
+}
+
+// 快速修改状态
+const handleStatusChange = async (row, newStatus) => {
+  try {
+    await applicationApi.update(row.id, { status: newStatus })
+    ElMessage.success('状态已更新')
+    fetchData()
+  } catch (error) {
+    console.error('更新状态失败:', error)
+    ElMessage.error('更新失败')
+    fetchData() // 恢复原状态
   }
 }
 
@@ -656,6 +684,8 @@ onMounted(() => {
   border-radius: var(--radius-lg) !important;
   background: var(--bg-card) !important;
   backdrop-filter: var(--glass-blur);
+  position: relative;
+  z-index: 10;
 }
 
 .search-btn {
@@ -672,6 +702,8 @@ onMounted(() => {
   border-radius: var(--radius-lg) !important;
   background: var(--bg-card) !important;
   backdrop-filter: var(--glass-blur);
+  position: relative;
+  z-index: 1;
 }
 
 .pagination-wrapper {
@@ -744,5 +776,22 @@ onMounted(() => {
 .text-muted {
   color: var(--text-muted);
   font-size: 13px;
+}
+
+/* 状态 tag 可点击样式 */
+.status-tag-clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-tag-clickable:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 下拉选项 tag 样式 */
+.status-option-tag {
+  width: 100%;
+  justify-content: center;
 }
 </style>

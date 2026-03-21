@@ -120,3 +120,93 @@
   --el-tag-bg-color: var(--bg-glass);
   --el-tag-border-color: var(--border-color);
 }
+
+/* 暗色主题 - Descriptions 描述列表 */
+[data-theme="dark"] .el-descriptions {
+  --el-descriptions-item-bordered-label-background: var(--bg-secondary);
+}
+
+[data-theme="dark"] .el-descriptions__label {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .el-descriptions__content {
+  color: var(--text-primary);
+}
+
+/* 暗色主题 - Divider 分割线 */
+[data-theme="dark"] .el-divider {
+  --el-border-color: var(--border-color);
+}
+
+[data-theme="dark"] .el-divider__text {
+  background-color: var(--bg-card);
+  color: var(--text-secondary);
+}
+
+/* 暗色主题 - Empty 空状态 */
+[data-theme="dark"] .el-empty__description {
+  color: var(--text-muted);
+}
+
+/* 暗色主题 - Dialog 对话框 */
+[data-theme="dark"] .el-dialog__header {
+  background: var(--primary-gradient);
+}
+
+[data-theme="dark"] .el-dialog__title {
+  color: #fff;
+}
+
+[data-theme="dark"] .el-dialog__body {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .el-dialog__footer {
+  border-top-color: var(--border-color);
+}
+
+/* 暗色主题 - Message Box */
+[data-theme="dark"] .el-message-box {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .el-message-box__title {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .el-message-box__content {
+  color: var(--text-secondary);
+}
+
+/* 暗色主题 - DatePicker 日期选择器 */
+[data-theme="dark"] .el-date-editor .el-input__wrapper {
+  background-color: var(--bg-secondary);
+}
+
+/* 暗色主题 - InputNumber 数字输入框 */
+[data-theme="dark"] .el-input-number {
+  --el-input-number-bg-color: var(--bg-secondary);
+}
+
+/* 暗色主题 - Dropdown 下拉菜单 */
+[data-theme="dark"] .el-dropdown-menu {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .el-dropdown-menu__item {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .el-dropdown-menu__item:hover {
+  background-color: var(--bg-glass);
+  color: var(--primary-color);
+}
+
+/* 修复下拉菜单被遮挡的问题 */
+.el-select-dropdown,
+.el-dropdown-menu {
+  z-index: 3000 !important;
+}
