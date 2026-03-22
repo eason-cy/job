@@ -41,7 +41,7 @@
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
             <el-dropdown trigger="click" @command="(cmd) => handleStatusChange(row, cmd)">
-              <el-tag :type="getStatusType(row.status)" class="status-tag-clickable">
+              <el-tag :color="getStatusColor(row.status)" class="status-tag-clickable">
                 {{ row.status }}
               </el-tag>
               <template #dropdown>
@@ -51,7 +51,7 @@
                     :key="item"
                     :command="item"
                   >
-                    <el-tag :type="getStatusType(item)" size="small">{{ item }}</el-tag>
+                    <el-tag :color="getStatusColor(item)" size="small">{{ item }}</el-tag>
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -142,7 +142,7 @@
         <el-descriptions-item label="类型">{{ detailData.jobType }}</el-descriptions-item>
         <el-descriptions-item label="投递日期">{{ detailData.applyDate }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="getStatusType(detailData.status)" class="tag-glow">{{ detailData.status }}</el-tag>
+          <el-tag :color="getStatusColor(detailData.status)" class="tag-glow">{{ detailData.status }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="投递链接">
             <el-button
@@ -304,7 +304,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { applicationApi, writtenTestApi, interviewApi } from '../api'
 
-const statusOptions = ['待处理', '流程中', '测评中', '笔试中', '面试中', '已offer', '已拒绝', '已淘汰']
+const statusOptions = ['待处理', '测评中', '笔试中', '面试中', '已offer', '已淘汰']
 
 const searchForm = reactive({
   companyName: '',
@@ -378,12 +378,25 @@ const getStatusType = (status) => {
     '流程中': 'primary',
     '测评中': 'warning',
     '笔试中': 'warning',
-    '面试中': 'primary',
+    '面试中': 'warning',
     '已offer': 'success',
     '已拒绝': 'danger',
     '已淘汰': 'danger'
   }
   return map[status] || 'info'
+}
+
+// 获取状态颜色，与数据看板保持一致
+const getStatusColor = (status) => {
+  const map = {
+    '待处理': '#3b82f6',
+    '测评中': '#f59e0b',
+    '笔试中': '#8b5cf6',
+    '面试中': '#06b6d4',
+    '已offer': '#22c55e',
+    '已淘汰': '#6b7280'
+  }
+  return map[status] || '#9ca3af'
 }
 
 const getResultType = (result) => {
@@ -472,11 +485,16 @@ const openDialog = (row) => {
 const handleSubmit = async () => {
   await formRef.value.validate()
   try {
+    const submitData = { ...form }
+    // 新增时，如果未选择投递日期，默认为当前日期
+    if (!editingId.value && !submitData.applyDate) {
+      submitData.applyDate = new Date().toISOString().split('T')[0]
+    }
     if (editingId.value) {
-      await applicationApi.update(editingId.value, form)
+      await applicationApi.update(editingId.value, submitData)
       ElMessage.success('更新成功')
     } else {
-      await applicationApi.create(form)
+      await applicationApi.create(submitData)
       ElMessage.success('创建成功')
     }
     dialogVisible.value = false
@@ -776,6 +794,19 @@ onMounted(() => {
 .text-muted {
   color: var(--text-muted);
   font-size: 13px;
+}
+
+/* 自定义状态 tag 颜色 */
+.status-tag-clickable,
+.tag-glow {
+  color: #fff !important;
+  border: none !important;
+}
+
+/* 下拉菜单中的 tag 样式 */
+:deep(.el-dropdown-menu .el-tag) {
+  color: #fff !important;
+  border: none !important;
 }
 
 /* 状态 tag 可点击样式 */

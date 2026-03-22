@@ -92,6 +92,21 @@
   --el-table-text-color: var(--text-primary);
 }
 
+/* 暗色主题 - 表格斑马纹偶数行 */
+[data-theme="dark"] .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell,
+[data-theme="dark"] .el-table--striped .el-table__body tr.el-table__row--striped .el-table__cell {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* 备用选择器 - 兼容不同 Element Plus 版本 */
+[data-theme="dark"] .el-table.el-table--striped .el-table__body-wrapper tbody tr:nth-child(even) td {
+  background-color: var(--bg-secondary) !important;
+}
+
+[data-theme="dark"] .el-table.el-table--striped .el-table__body-wrapper tbody tr:nth-child(even) {
+  background-color: var(--bg-secondary) !important;
+}
+
 [data-theme="dark"] .el-button--primary {
   --el-button-bg-color: var(--primary-color);
   --el-button-border-color: var(--primary-color);

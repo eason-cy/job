@@ -5,47 +5,60 @@
     </div>
 
     <!-- 统计卡片 -->
-    <el-row :gutter="20" class="stat-cards">
-      <el-col :span="6">
-        <el-card shadow="hover" class="stat-card-wrapper card-hover">
-          <div class="stat-card">
-            <div class="stat-icon total">
-              <el-icon :size="32"><Document /></el-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value number-animate">{{ statistics.total }}</div>
-              <div class="stat-label">投递总数</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
+    <el-row :gutter="20" class="stat-cards" justify="center">
+      <el-col :span="4">
         <el-card shadow="hover" class="stat-card-wrapper card-hover">
           <div class="stat-card">
             <div class="stat-icon pending">
               <el-icon :size="32"><Clock /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-value number-animate">{{ statistics.pending }}</div>
+              <div class="stat-value number-animate">{{ getStatusCount('待处理') }}</div>
               <div class="stat-label">待处理</div>
             </div>
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="4">
+        <el-card shadow="hover" class="stat-card-wrapper card-hover">
+          <div class="stat-card">
+            <div class="stat-icon assessment">
+              <el-icon :size="32"><EditPen /></el-icon>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value number-animate">{{ getStatusCount('测评中') }}</div>
+              <div class="stat-label">测评中</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="4">
+        <el-card shadow="hover" class="stat-card-wrapper card-hover">
+          <div class="stat-card">
+            <div class="stat-icon written-test">
+              <el-icon :size="32"><Edit /></el-icon>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value number-animate">{{ getStatusCount('笔试中') }}</div>
+              <div class="stat-label">笔试中</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="4">
         <el-card shadow="hover" class="stat-card-wrapper card-hover">
           <div class="stat-card">
             <div class="stat-icon interviewing">
               <el-icon :size="32"><ChatDotRound /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-value number-animate">{{ statistics.interviewing }}</div>
+              <div class="stat-value number-animate">{{ getStatusCount('面试中') }}</div>
               <div class="stat-label">面试中</div>
             </div>
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="4">
         <el-card shadow="hover" class="stat-card-wrapper card-hover">
           <div class="stat-card">
             <div class="stat-icon offer">
@@ -53,7 +66,20 @@
             </div>
             <div class="stat-info">
               <div class="stat-value number-animate">{{ getStatusCount('已offer') }}</div>
-              <div class="stat-label">已获Offer</div>
+              <div class="stat-label">Offer</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="4">
+        <el-card shadow="hover" class="stat-card-wrapper card-hover">
+          <div class="stat-card">
+            <div class="stat-icon eliminated">
+              <el-icon :size="32"><CircleClose /></el-icon>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value number-animate">{{ getStatusCount('已淘汰') }}</div>
+              <div class="stat-label">已淘汰</div>
             </div>
           </div>
         </el-card>
@@ -131,26 +157,22 @@ const getChartColors = () => {
   if (isDark) {
     // 暗色模式配色方案
     return {
-      '待处理': '#64748b',    // 灰色 - 还没开始
-      '流程中': '#60a5fa',    // 蓝色 - 正在进行
-      '测评中': '#fbbf24',    // 金色 - 需要关注
-      '笔试中': '#a78bfa',    // 紫色 - 技术考核
-      '面试中': '#22d3ee',    // 青色 - 接近成功
-      '已offer': '#4ade80',   // 翠绿 - 成功
-      '已拒绝': '#fb7185',    // 粉红 - 主动拒绝
-      '已淘汰': '#94a3b8'     // 银灰 - 结束
+      '待处理': '#60a5fa',
+      '测评中': '#fbbf24',
+      '笔试中': '#a78bfa',
+      '面试中': '#22d3ee',
+      '已offer': '#4ade80',
+      '已淘汰': '#94a3b8'
     }
   }
   // 亮色模式配色方案
   return {
-    '待处理': '#9ca3af',    // 灰色 - 还没开始
-    '流程中': '#3b82f6',    // 蓝色 - 正在进行
-    '测评中': '#f59e0b',    // 金色 - 需要关注
-    '笔试中': '#8b5cf6',    // 紫色 - 技术考核
-    '面试中': '#06b6d4',    // 青色 - 接近成功
-    '已offer': '#22c55e',   // 翠绿 - 成功
-    '已拒绝': '#ef4444',    // 红色 - 主动拒绝
-    '已淘汰': '#6b7280'     // 深灰 - 结束
+    '待处理': '#3b82f6',
+    '测评中': '#f59e0b',
+    '笔试中': '#8b5cf6',
+    '面试中': '#06b6d4',
+    '已offer': '#22c55e',
+    '已淘汰': '#6b7280'
   }
 }
 
@@ -318,20 +340,28 @@ onUnmounted(() => {
   box-shadow: var(--shadow-md);
 }
 
-.stat-icon.total {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.stat-icon.pending {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
 }
 
-.stat-icon.pending {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+.stat-icon.assessment {
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+}
+
+.stat-icon.written-test {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
 }
 
 .stat-icon.interviewing {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);
 }
 
 .stat-icon.offer {
   background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.stat-icon.eliminated {
+  background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
 }
 
 .stat-info {
