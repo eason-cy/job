@@ -1,9 +1,5 @@
 <template>
   <div class="dashboard">
-    <div class="page-header">
-      <h2>数据看板</h2>
-    </div>
-
     <!-- 统计卡片 -->
     <el-row :gutter="20" class="stat-cards" justify="center">
       <el-col :span="4">
@@ -292,23 +288,12 @@ onUnmounted(() => {
 
 <style scoped>
 .dashboard {
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.page-header {
-  margin-bottom: 24px;
-}
-
-.page-header h2 {
+  padding: 0;
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text-primary);
 }
 
 .stat-cards {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .stat-card-wrapper {
@@ -325,7 +310,7 @@ onUnmounted(() => {
 .stat-card {
   display: flex;
   align-items: center;
-  padding: 8px 0;
+  padding: 12px 0;
 }
 
 .stat-icon {
@@ -369,20 +354,21 @@ onUnmounted(() => {
 }
 
 .stat-value {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
   color: var(--text-primary);
-  line-height: 1.2;
+  line-height: 1.4;
 }
 
 .stat-label {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-muted);
-  margin-top: 4px;
+  margin-top: 6px;
+  line-height: 1.6;
 }
 
 .charts {
-  margin-top: 24px;
+  margin-top: 20px;
 }
 
 .chart-card {
@@ -396,6 +382,7 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   font-weight: 600;
+  font-size: 16px;
   color: var(--text-primary);
 }
 
@@ -404,7 +391,7 @@ onUnmounted(() => {
 }
 
 .quick-actions-card {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   border: none !important;
   border-radius: var(--radius-lg) !important;
   background: var(--bg-card) !important;
@@ -415,7 +402,7 @@ onUnmounted(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  padding: 8px 0;
+  padding: 12px 0;
   justify-content: flex-start;
 }
 
@@ -435,7 +422,7 @@ onUnmounted(() => {
 .action-btn {
   width: 140px;
   height: 44px;
-  font-size: 14px;
+  font-size: 15px;
   border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;

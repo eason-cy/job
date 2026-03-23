@@ -1,13 +1,5 @@
 <template>
   <div class="application-list">
-    <div class="page-header">
-      <h2>投递列表</h2>
-      <el-button type="primary" class="add-btn" @click="openDialog()">
-        <el-icon><Plus /></el-icon>
-        新增投递
-      </el-button>
-    </div>
-
     <!-- 搜索栏 -->
     <el-card class="search-card card-hover">
       <el-form :inline="true">
@@ -666,22 +658,8 @@ onMounted(() => {
 
 <style scoped>
 .application-list {
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.page-header h2 {
+  padding: 0;
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text-primary);
 }
 
 .add-btn {
@@ -697,13 +675,13 @@ onMounted(() => {
 }
 
 .search-card {
-  margin-bottom: 20px;
   border: none !important;
   border-radius: var(--radius-lg) !important;
   background: var(--bg-card) !important;
   backdrop-filter: var(--glass-blur);
   position: relative;
   z-index: 10;
+  margin-bottom: 16px;
 }
 
 .search-btn {
@@ -824,5 +802,19 @@ onMounted(() => {
 .status-option-tag {
   width: 100%;
   justify-content: center;
+}
+
+/* 表格字体和行间距 */
+:deep(.el-table) {
+  font-size: 15px;
+}
+
+:deep(.el-table .el-table__cell) {
+  padding: 14px 0;
+  font-size: 15px;
+}
+
+:deep(.el-table .cell) {
+  line-height: 1.8;
 }
 </style>
