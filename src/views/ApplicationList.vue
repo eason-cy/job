@@ -19,6 +19,10 @@
         <el-form-item>
           <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
           <el-button class="reset-btn" @click="resetSearch">重置</el-button>
+          <el-button type="primary" class="add-btn" @click="openDialog()">
+            <el-icon><Plus /></el-icon>
+            新增投递
+          </el-button>
         </el-form-item>
       </el-form>
     </el-card>
