@@ -14,7 +14,7 @@ npm install    # 首次运行需要安装依赖
 npm run dev    # 启动服务
 ```
 
-启动后浏览器会自动打开 http://localhost:3000
+启动后浏览器会自动打开 http://localhost:8888
 
 ## 功能说明
 
