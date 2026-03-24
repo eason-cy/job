@@ -5,12 +5,22 @@ const STORAGE_KEY = 'job_tracker_data'
 const getData = () => {
   const data = localStorage.getItem(STORAGE_KEY)
   if (data) {
-    return JSON.parse(data)
+    const parsed = JSON.parse(data)
+    // 确保所有字段都存在（兼容旧数据）
+    return {
+      applications: parsed.applications || [],
+      writtenTests: parsed.writtenTests || [],
+      interviews: parsed.interviews || [],
+      algorithms: parsed.algorithms || [],
+      bagus: parsed.bagus || []
+    }
   }
   return {
     applications: [],
     writtenTests: [],
-    interviews: []
+    interviews: [],
+    algorithms: [],   // 算法题
+    bagus: []         // 八股题
   }
 }
 
@@ -52,9 +62,11 @@ export const applicationApi = {
     }
 
     result.sort((a, b) => {
-      // 置顶记录排在最前面
-      if (a.pinned !== b.pinned) {
-        return a.pinned ? -1 : 1
+      // 置顶记录排在最前面（处理undefined情况）
+      const pinnedA = a.pinned === true
+      const pinnedB = b.pinned === true
+      if (pinnedA !== pinnedB) {
+        return pinnedA ? -1 : 1
       }
       const priorityA = statusPriority[a.status] || 99
       const priorityB = statusPriority[b.status] || 99
@@ -210,11 +222,44 @@ export const interviewApi = {
     return Promise.resolve({ data: result })
   },
 
+  // 获取所有面试记录（用于面试记录汇总页面）
+  listAll(params = {}) {
+    const data = getData()
+    let result = data.interviews.map(item => {
+      // 关联公司信息
+      const app = data.applications.find(a => a.id === item.applicationId)
+      return {
+        ...item,
+        companyName: app?.companyName || '',
+        position: app?.position || ''
+      }
+    })
+
+    // 按公司筛选
+    if (params.companyName) {
+      result = result.filter(item => item.companyName.includes(params.companyName))
+    }
+
+    // 按日期倒序
+    result.sort((a, b) => new Date(b.interviewDate) - new Date(a.interviewDate))
+
+    return Promise.resolve({ data: result })
+  },
+
+  // 获取所有公司列表（用于筛选下拉）
+  getCompanies() {
+    const data = getData()
+    const companies = [...new Set(data.applications.map(app => app.companyName))].filter(Boolean)
+    return Promise.resolve({ data: companies })
+  },
+
   create(formData) {
     const data = getData()
     const newInterview = {
       id: generateId(),
       ...formData,
+      familiarity: formData.familiarity || 1,
+      reviewCount: 0,
       createTime: new Date().toISOString()
     }
     data.interviews.push(newInterview)
@@ -241,6 +286,331 @@ export const interviewApi = {
     data.interviews = data.interviews.filter(item => item.id !== id)
     saveData(data)
     return Promise.resolve()
+  },
+
+  // 更新熟悉度
+  updateFamiliarity(id, familiarity) {
+    const data = getData()
+    const index = data.interviews.findIndex(item => item.id === id)
+    if (index !== -1) {
+      data.interviews[index].familiarity = familiarity
+      data.interviews[index].reviewCount = (data.interviews[index].reviewCount || 0) + 1
+      data.interviews[index].lastReviewDate = new Date().toISOString().split('T')[0]
+      saveData(data)
+      return Promise.resolve({ data: data.interviews[index] })
+    }
+    return Promise.reject(new Error('未找到记录'))
+  }
+}
+
+// 算法题相关操作
+export const algorithmApi = {
+  list(params = {}) {
+    const data = getData()
+    let result = [...data.algorithms]
+
+    // 按难度筛选
+    if (params.difficulty) {
+      result = result.filter(item => item.difficulty === params.difficulty)
+    }
+
+    // 按熟悉度筛选
+    if (params.familiarity) {
+      result = result.filter(item => item.familiarity === params.familiarity)
+    }
+
+    // 按标签筛选
+    if (params.tag) {
+      result = result.filter(item => item.tags && item.tags.includes(params.tag))
+    }
+
+    // 关键词搜索
+    if (params.keyword) {
+      const kw = params.keyword.toLowerCase()
+      result = result.filter(item =>
+        item.title.toLowerCase().includes(kw) ||
+        String(item.leetcodeId).includes(kw)
+      )
+    }
+
+    // 排序：熟悉度低的在前，同熟悉度按题号排序
+    result.sort((a, b) => {
+      if (a.familiarity !== b.familiarity) {
+        return a.familiarity - b.familiarity
+      }
+      return a.leetcodeId - b.leetcodeId
+    })
+
+    // 分页
+    const page = params.page || 0
+    const size = params.size || 20
+    const total = result.length
+    const start = page * size
+    const end = start + size
+    const content = result.slice(start, end)
+
+    return Promise.resolve({
+      data: {
+        content,
+        totalElements: total,
+        totalPages: Math.ceil(total / size),
+        size,
+        number: page
+      }
+    })
+  },
+
+  get(id) {
+    const data = getData()
+    const item = data.algorithms.find(item => item.id === id)
+    return Promise.resolve({ data: item })
+  },
+
+  create(formData) {
+    const data = getData()
+    const newItem = {
+      id: generateId(),
+      ...formData,
+      familiarity: formData.familiarity || 1,
+      reviewCount: 0,
+      createTime: new Date().toISOString()
+    }
+    data.algorithms.push(newItem)
+    saveData(data)
+    return Promise.resolve({ data: newItem })
+  },
+
+  update(id, formData) {
+    const data = getData()
+    const index = data.algorithms.findIndex(item => item.id === id)
+    if (index !== -1) {
+      data.algorithms[index] = {
+        ...data.algorithms[index],
+        ...formData,
+        updateTime: new Date().toISOString()
+      }
+      saveData(data)
+      return Promise.resolve({ data: data.algorithms[index] })
+    }
+    return Promise.reject(new Error('未找到记录'))
+  },
+
+  delete(id) {
+    const data = getData()
+    data.algorithms = data.algorithms.filter(item => item.id !== id)
+    saveData(data)
+    return Promise.resolve()
+  },
+
+  // 批量导入
+  batchImport(questions) {
+    const data = getData()
+    const existingIds = new Set(data.algorithms.map(item => item.leetcodeId))
+    const newItems = questions
+      .filter(q => !existingIds.has(q.leetcodeId))
+      .map(q => ({
+        id: generateId(),
+        ...q,
+        familiarity: 1,
+        reviewCount: 0,
+        createTime: new Date().toISOString()
+      }))
+    data.algorithms.push(...newItems)
+    saveData(data)
+    return Promise.resolve({ data: { imported: newItems.length, skipped: questions.length - newItems.length } })
+  },
+
+  // 更新熟悉度
+  updateFamiliarity(id, familiarity) {
+    const data = getData()
+    const index = data.algorithms.findIndex(item => item.id === id)
+    if (index !== -1) {
+      data.algorithms[index].familiarity = familiarity
+      data.algorithms[index].reviewCount = (data.algorithms[index].reviewCount || 0) + 1
+      data.algorithms[index].lastReviewDate = new Date().toISOString().split('T')[0]
+      saveData(data)
+      return Promise.resolve({ data: data.algorithms[index] })
+    }
+    return Promise.reject(new Error('未找到记录'))
+  },
+
+  // 获取统计数据
+  getStatistics() {
+    const data = getData()
+    const total = data.algorithms.length
+    const byDifficulty = { Easy: 0, Medium: 0, Hard: 0 }
+    const byFamiliarity = { 1: 0, 2: 0, 3: 0 }
+    const tags = {}
+
+    data.algorithms.forEach(item => {
+      if (item.difficulty) byDifficulty[item.difficulty]++
+      if (item.familiarity) byFamiliarity[item.familiarity]++
+      if (item.tags) {
+        item.tags.forEach(tag => {
+          tags[tag] = (tags[tag] || 0) + 1
+        })
+      }
+    })
+
+    return Promise.resolve({
+      data: {
+        total,
+        byDifficulty,
+        byFamiliarity,
+        needReview: byFamiliarity[1],
+        tags
+      }
+    })
+  },
+
+  // 获取所有标签
+  getTags() {
+    const data = getData()
+    const tags = new Set()
+    data.algorithms.forEach(item => {
+      if (item.tags) {
+        item.tags.forEach(tag => tags.add(tag))
+      }
+    })
+    return Promise.resolve({ data: [...tags] })
+  }
+}
+
+// 八股题相关操作
+export const baguApi = {
+  list(params = {}) {
+    const data = getData()
+    let result = [...data.bagus]
+
+    // 按分类筛选
+    if (params.category) {
+      result = result.filter(item => item.category === params.category)
+    }
+
+    // 按熟悉度筛选
+    if (params.familiarity) {
+      result = result.filter(item => item.familiarity === params.familiarity)
+    }
+
+    // 关键词搜索
+    if (params.keyword) {
+      const kw = params.keyword.toLowerCase()
+      result = result.filter(item =>
+        item.question.toLowerCase().includes(kw) ||
+        (item.answer && item.answer.toLowerCase().includes(kw))
+      )
+    }
+
+    // 排序：熟悉度低的在前
+    result.sort((a, b) => {
+      if (a.familiarity !== b.familiarity) {
+        return a.familiarity - b.familiarity
+      }
+      return new Date(b.createTime) - new Date(a.createTime)
+    })
+
+    // 分页
+    const page = params.page || 0
+    const size = params.size || 20
+    const total = result.length
+    const start = page * size
+    const end = start + size
+    const content = result.slice(start, end)
+
+    return Promise.resolve({
+      data: {
+        content,
+        totalElements: total,
+        totalPages: Math.ceil(total / size),
+        size,
+        number: page
+      }
+    })
+  },
+
+  get(id) {
+    const data = getData()
+    const item = data.bagus.find(item => item.id === id)
+    return Promise.resolve({ data: item })
+  },
+
+  create(formData) {
+    const data = getData()
+    const newItem = {
+      id: generateId(),
+      ...formData,
+      familiarity: formData.familiarity || 1,
+      reviewCount: 0,
+      createTime: new Date().toISOString()
+    }
+    data.bagus.push(newItem)
+    saveData(data)
+    return Promise.resolve({ data: newItem })
+  },
+
+  update(id, formData) {
+    const data = getData()
+    const index = data.bagus.findIndex(item => item.id === id)
+    if (index !== -1) {
+      data.bagus[index] = {
+        ...data.bagus[index],
+        ...formData,
+        updateTime: new Date().toISOString()
+      }
+      saveData(data)
+      return Promise.resolve({ data: data.bagus[index] })
+    }
+    return Promise.reject(new Error('未找到记录'))
+  },
+
+  delete(id) {
+    const data = getData()
+    data.bagus = data.bagus.filter(item => item.id !== id)
+    saveData(data)
+    return Promise.resolve()
+  },
+
+  // 更新熟悉度
+  updateFamiliarity(id, familiarity) {
+    const data = getData()
+    const index = data.bagus.findIndex(item => item.id === id)
+    if (index !== -1) {
+      data.bagus[index].familiarity = familiarity
+      data.bagus[index].reviewCount = (data.bagus[index].reviewCount || 0) + 1
+      data.bagus[index].lastReviewDate = new Date().toISOString().split('T')[0]
+      saveData(data)
+      return Promise.resolve({ data: data.bagus[index] })
+    }
+    return Promise.reject(new Error('未找到记录'))
+  },
+
+  // 获取统计数据
+  getStatistics() {
+    const data = getData()
+    const total = data.bagus.length
+    const byCategory = {}
+    const byFamiliarity = { 1: 0, 2: 0, 3: 0 }
+
+    data.bagus.forEach(item => {
+      if (item.category) byCategory[item.category] = (byCategory[item.category] || 0) + 1
+      if (item.familiarity) byFamiliarity[item.familiarity]++
+    })
+
+    return Promise.resolve({
+      data: {
+        total,
+        byCategory,
+        byFamiliarity,
+        needReview: byFamiliarity[1]
+      }
+    })
+  },
+
+  // 获取所有分类
+  getCategories() {
+    const data = getData()
+    const categories = [...new Set(data.bagus.map(item => item.category).filter(Boolean))]
+    return Promise.resolve({ data: categories })
   }
 }
 
@@ -264,6 +634,9 @@ export const importData = (file) => {
       try {
         const data = JSON.parse(e.target.result)
         if (data.applications && data.writtenTests && data.interviews) {
+          // 兼容旧数据格式，补充新字段
+          if (!data.algorithms) data.algorithms = []
+          if (!data.bagus) data.bagus = []
           saveData(data)
           resolve()
         } else {

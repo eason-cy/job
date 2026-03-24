@@ -29,7 +29,8 @@
 
     <!-- 列表 -->
     <el-card class="table-card card-hover">
-      <el-table :data="tableData" stripe class="custom-table">
+      <div class="table-wrapper">
+        <el-table :data="tableData" stripe class="custom-table" table-layout="auto">
         <el-table-column prop="companyName" label="公司名称" min-width="120">
           <template #default="{ row }">
             <div class="company-cell">
@@ -91,6 +92,7 @@
           </template>
         </el-table-column>
       </el-table>
+      </div>
 
       <div class="pagination-wrapper">
         <el-pagination
@@ -875,5 +877,31 @@ onMounted(() => {
   50% {
     opacity: 0.6;
   }
+}
+
+/* 表格横向滚动容器 */
+.table-wrapper {
+  overflow-x: auto;
+  position: relative;
+}
+
+/* 美化滚动条 */
+.table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+  opacity: 0.8;
 }
 </style>

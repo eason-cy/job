@@ -28,6 +28,18 @@
           <el-icon><List /></el-icon>
           <span>投递列表</span>
         </el-menu-item>
+        <el-menu-item index="/algorithms" class="menu-item-hover">
+          <el-icon><Cpu /></el-icon>
+          <span>算法题</span>
+        </el-menu-item>
+        <el-menu-item index="/bagus" class="menu-item-hover">
+          <el-icon><Notebook /></el-icon>
+          <span>八股题</span>
+        </el-menu-item>
+        <el-menu-item index="/interview-records" class="menu-item-hover">
+          <el-icon><ChatLineRound /></el-icon>
+          <span>面试记录</span>
+        </el-menu-item>
       </el-menu>
 
       <div class="sidebar-footer">
@@ -84,7 +96,10 @@ const isDark = ref(localStorage.getItem('theme') === 'dark')
 const pageTitle = computed(() => {
   const titles = {
     '/': '数据看板',
-    '/applications': '投递列表'
+    '/applications': '投递列表',
+    '/algorithms': '算法题',
+    '/bagus': '八股题',
+    '/interview-records': '面试记录'
   }
   return titles[route.path] || '数据看板'
 })
