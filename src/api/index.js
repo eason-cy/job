@@ -39,7 +39,7 @@ export const applicationApi = {
       result = result.filter(item => item.status === params.status)
     }
 
-    // 排序 - 先按状态优先级，再按投递日期倒序
+    // 排序 - 先按置顶，再按状态优先级，最后按投递日期倒序
     const statusPriority = {
       '已offer': 1,
       '流程中': 2,
@@ -52,6 +52,10 @@ export const applicationApi = {
     }
 
     result.sort((a, b) => {
+      // 置顶记录排在最前面
+      if (a.pinned !== b.pinned) {
+        return a.pinned ? -1 : 1
+      }
       const priorityA = statusPriority[a.status] || 99
       const priorityB = statusPriority[b.status] || 99
       if (priorityA !== priorityB) {
@@ -93,6 +97,7 @@ export const applicationApi = {
     const newApp = {
       id: generateId(),
       ...formData,
+      pinned: false,
       createTime: new Date().toISOString(),
       updateTime: new Date().toISOString()
     }

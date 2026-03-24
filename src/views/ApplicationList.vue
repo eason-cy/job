@@ -30,7 +30,14 @@
     <!-- 列表 -->
     <el-card class="table-card card-hover">
       <el-table :data="tableData" stripe class="custom-table">
-        <el-table-column prop="companyName" label="公司名称" min-width="120" />
+        <el-table-column prop="companyName" label="公司名称" min-width="120">
+          <template #default="{ row }">
+            <div class="company-cell">
+              <el-icon v-if="row.pinned" class="pin-icon"><Star /></el-icon>
+              <span>{{ row.companyName }}</span>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="position" label="岗位" min-width="120" />
         <el-table-column prop="jobType" label="类型" width="80" />
         <el-table-column prop="applyDate" label="投递日期" width="110" />
@@ -47,7 +54,7 @@
                     :key="item"
                     :command="item"
                   >
-                    <el-tag :color="getStatusColor(item)" size="small">{{ item }}</el-tag>
+                    <el-tag :color="getStatusColor(item)" size="small" class="status-option-tag">{{ item }}</el-tag>
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -70,9 +77,13 @@
           </template>
         </el-table-column>
         <el-table-column prop="remark" label="备注" min-width="150" show-overflow-tooltip />
-        <el-table-column label="操作" width="220" fixed="right">
+        <el-table-column label="操作" width="280" fixed="right">
           <template #default="{ row }">
             <div class="action-buttons">
+              <el-button size="small" :type="row.pinned ? 'warning' : 'default'" plain class="btn-click" @click="togglePin(row)">
+                <el-icon><Star /></el-icon>
+                {{ row.pinned ? '取消置顶' : '置顶' }}
+              </el-button>
               <el-button size="small" type="primary" plain class="btn-click" @click="viewDetail(row)">详情</el-button>
               <el-button size="small" type="primary" class="btn-click" @click="openDialog(row)">编辑</el-button>
               <el-button size="small" type="danger" plain class="btn-click" @click="handleDelete(row)">删除</el-button>
@@ -298,6 +309,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Star } from '@element-plus/icons-vue'
 import { applicationApi, writtenTestApi, interviewApi } from '../api'
 
 const statusOptions = ['待处理', '测评中', '笔试中', '面试中', '已offer', '已淘汰']
@@ -510,6 +522,18 @@ const handleDelete = async (row) => {
     fetchData()
   } catch (error) {
     console.error('删除失败:', error)
+  }
+}
+
+// 置顶/取消置顶
+const togglePin = async (row) => {
+  try {
+    await applicationApi.update(row.id, { pinned: !row.pinned })
+    ElMessage.success(row.pinned ? '已取消置顶' : '已置顶')
+    fetchData()
+  } catch (error) {
+    console.error('操作失败:', error)
+    ElMessage.error('操作失败')
   }
 }
 
@@ -791,6 +815,15 @@ onMounted(() => {
   border: none !important;
 }
 
+/* 下拉选项文字颜色修复 */
+:deep(.el-dropdown-menu__item) {
+  color: var(--text-primary);
+}
+
+:deep(.el-dropdown-menu__item .el-tag) {
+  color: #fff !important;
+}
+
 /* 状态 tag 可点击样式 */
 .status-tag-clickable {
   cursor: pointer;
@@ -804,8 +837,8 @@ onMounted(() => {
 
 /* 下拉选项 tag 样式 */
 .status-option-tag {
-  width: 100%;
-  justify-content: center;
+  color: #fff !important;
+  border: none !important;
 }
 
 /* 表格字体和行间距 */
@@ -820,5 +853,27 @@ onMounted(() => {
 
 :deep(.el-table .cell) {
   line-height: 1.8;
+}
+
+/* 置顶图标样式 */
+.company-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pin-icon {
+  color: #f59e0b;
+  font-size: 16px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 </style>
