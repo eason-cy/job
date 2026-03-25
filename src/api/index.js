@@ -333,10 +333,17 @@ export const algorithmApi = {
       )
     }
 
-    // 排序：熟悉度低的在前，同熟悉度按题号排序
+    // 排序：复习次数多的在前，同复习次数按熟悉度（不熟的在前），再按题号
     result.sort((a, b) => {
-      if (a.familiarity !== b.familiarity) {
-        return a.familiarity - b.familiarity
+      const reviewA = a.reviewCount || 0
+      const reviewB = b.reviewCount || 0
+      if (reviewA !== reviewB) {
+        return reviewB - reviewA
+      }
+      const famA = a.familiarity || 1
+      const famB = b.familiarity || 1
+      if (famA !== famB) {
+        return famA - famB
       }
       return a.leetcodeId - b.leetcodeId
     })
@@ -426,6 +433,19 @@ export const algorithmApi = {
     const index = data.algorithms.findIndex(item => item.id === id)
     if (index !== -1) {
       data.algorithms[index].familiarity = familiarity
+      data.algorithms[index].reviewCount = (data.algorithms[index].reviewCount || 0) + 1
+      data.algorithms[index].lastReviewDate = new Date().toISOString().split('T')[0]
+      saveData(data)
+      return Promise.resolve({ data: data.algorithms[index] })
+    }
+    return Promise.reject(new Error('未找到记录'))
+  },
+
+  // 增加复习次数（不修改熟悉度）
+  incrementReview(id) {
+    const data = getData()
+    const index = data.algorithms.findIndex(item => item.id === id)
+    if (index !== -1) {
       data.algorithms[index].reviewCount = (data.algorithms[index].reviewCount || 0) + 1
       data.algorithms[index].lastReviewDate = new Date().toISOString().split('T')[0]
       saveData(data)
