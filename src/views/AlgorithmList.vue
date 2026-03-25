@@ -318,15 +318,15 @@ const fetchData = async () => {
 // 本地排序函数
 const sortTableData = () => {
   tableData.value.sort((a, b) => {
-    const reviewA = a.reviewCount || 0
-    const reviewB = b.reviewCount || 0
-    if (reviewA !== reviewB) {
-      return reviewB - reviewA
-    }
     const famA = a.familiarity || 1
     const famB = b.familiarity || 1
     if (famA !== famB) {
       return famA - famB
+    }
+    const reviewA = a.reviewCount || 0
+    const reviewB = b.reviewCount || 0
+    if (reviewA !== reviewB) {
+      return reviewB - reviewA
     }
     return a.leetcodeId - b.leetcodeId
   })

@@ -333,17 +333,17 @@ export const algorithmApi = {
       )
     }
 
-    // 排序：复习次数多的在前，同复习次数按熟悉度（不熟的在前），再按题号
+    // 排序：熟悉度低的在前，同熟悉度按复习次数多的在前，再按题号
     result.sort((a, b) => {
-      const reviewA = a.reviewCount || 0
-      const reviewB = b.reviewCount || 0
-      if (reviewA !== reviewB) {
-        return reviewB - reviewA
-      }
       const famA = a.familiarity || 1
       const famB = b.familiarity || 1
       if (famA !== famB) {
         return famA - famB
+      }
+      const reviewA = a.reviewCount || 0
+      const reviewB = b.reviewCount || 0
+      if (reviewA !== reviewB) {
+        return reviewB - reviewA
       }
       return a.leetcodeId - b.leetcodeId
     })
