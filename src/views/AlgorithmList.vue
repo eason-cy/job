@@ -97,7 +97,7 @@
     <!-- 列表 -->
     <el-card class="table-card card-hover">
       <div class="table-wrapper">
-        <el-table :data="tableData" stripe class="custom-table" table-layout="auto">
+        <el-table :data="tableData" stripe class="custom-table" table-layout="auto" row-key="id">
         <el-table-column prop="leetcodeId" label="题号" width="80" />
         <el-table-column label="题目" min-width="200">
           <template #default="{ row }">
@@ -125,7 +125,14 @@
             <el-rate v-model="row.familiarity" :max="3" @change="updateFamiliarity(row)" />
           </template>
         </el-table-column>
-        <el-table-column prop="reviewCount" label="复习次数" width="90" />
+        <el-table-column label="复习次数" width="110">
+          <template #default="{ row }">
+            <span>{{ row.reviewCount || 0 }}</span>
+            <el-button size="small" type="success" link @click="incrementReview(row)" style="margin-left: 4px;">
+              <el-icon><Plus /></el-icon>
+            </el-button>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="150" fixed="right">
           <template #default="{ row }">
             <el-button size="small" type="primary" link @click="openDetail(row)">详情</el-button>
@@ -207,7 +214,12 @@
         <el-descriptions-item label="熟悉度">
           <el-rate v-model="detailData.familiarity" :max="3" @change="saveDetailFamiliarity" />
         </el-descriptions-item>
-        <el-descriptions-item label="复习次数">{{ detailData.reviewCount || 0 }}</el-descriptions-item>
+        <el-descriptions-item label="复习次数">
+          {{ detailData.reviewCount || 0 }}
+          <el-button size="small" type="success" link @click="incrementReviewDetail" style="margin-left: 4px;">
+            <el-icon><Plus /></el-icon>复习
+          </el-button>
+        </el-descriptions-item>
         <el-descriptions-item label="上次复习">{{ detailData.lastReviewDate || '未复习' }}</el-descriptions-item>
       </el-descriptions>
 
@@ -301,6 +313,23 @@ const fetchData = async () => {
   } catch (error) {
     console.error('获取数据失败:', error)
   }
+}
+
+// 本地排序函数
+const sortTableData = () => {
+  tableData.value.sort((a, b) => {
+    const famA = a.familiarity || 1
+    const famB = b.familiarity || 1
+    if (famA !== famB) {
+      return famA - famB
+    }
+    const reviewA = a.reviewCount || 0
+    const reviewB = b.reviewCount || 0
+    if (reviewA !== reviewB) {
+      return reviewB - reviewA
+    }
+    return a.leetcodeId - b.leetcodeId
+  })
 }
 
 const fetchStatistics = async () => {
@@ -405,7 +434,14 @@ const handleSubmit = async () => {
 
 const updateFamiliarity = async (row) => {
   try {
-    await algorithmApi.updateFamiliarity(row.id, row.familiarity)
+    const response = await algorithmApi.updateFamiliarity(row.id, row.familiarity)
+    // 本地更新数据
+    const index = tableData.value.findIndex(item => item.id === row.id)
+    if (index !== -1) {
+      tableData.value[index] = { ...tableData.value[index], ...response.data }
+    }
+    // 本地排序
+    sortTableData()
     ElMessage.success('已更新熟悉度')
     fetchStatistics()
   } catch (error) {
@@ -413,14 +449,58 @@ const updateFamiliarity = async (row) => {
   }
 }
 
+// 增加复习次数
+const incrementReview = async (row) => {
+  try {
+    const response = await algorithmApi.incrementReview(row.id)
+    // 本地更新数据
+    const index = tableData.value.findIndex(item => item.id === row.id)
+    if (index !== -1) {
+      tableData.value[index] = { ...tableData.value[index], ...response.data }
+    }
+    // 本地排序
+    sortTableData()
+    ElMessage.success('已记录复习')
+  } catch (error) {
+    console.error('操作失败:', error)
+  }
+}
+
 const saveDetailFamiliarity = async () => {
   try {
-    await algorithmApi.updateFamiliarity(detailData.value.id, detailData.value.familiarity)
+    const response = await algorithmApi.updateFamiliarity(detailData.value.id, detailData.value.familiarity)
+    // 更新详情数据
+    detailData.value = { ...detailData.value, ...response.data }
+    // 本地更新列表数据
+    const index = tableData.value.findIndex(item => item.id === detailData.value.id)
+    if (index !== -1) {
+      tableData.value[index] = { ...tableData.value[index], ...response.data }
+    }
+    // 本地排序
+    sortTableData()
     ElMessage.success('已更新熟悉度')
-    fetchData()
     fetchStatistics()
   } catch (error) {
     console.error('更新失败:', error)
+  }
+}
+
+// 详情页增加复习次数
+const incrementReviewDetail = async () => {
+  try {
+    const response = await algorithmApi.incrementReview(detailData.value.id)
+    // 更新详情数据
+    detailData.value = { ...detailData.value, ...response.data }
+    // 本地更新列表数据
+    const index = tableData.value.findIndex(item => item.id === detailData.value.id)
+    if (index !== -1) {
+      tableData.value[index] = { ...tableData.value[index], ...response.data }
+    }
+    // 本地排序
+    sortTableData()
+    ElMessage.success('已记录复习')
+  } catch (error) {
+    console.error('操作失败:', error)
   }
 }
 
@@ -594,6 +674,15 @@ onMounted(async () => {
 .table-wrapper {
   overflow-x: auto;
   position: relative;
+}
+
+/* 表格行过渡动画 */
+:deep(.el-table__row) {
+  transition: all 0.3s ease;
+}
+
+:deep(.el-table__body-wrapper) {
+  transition: all 0.3s ease;
 }
 
 /* 美化滚动条 */
