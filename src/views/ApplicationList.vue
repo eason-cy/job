@@ -98,7 +98,7 @@
         <el-pagination
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.size"
-          :page-sizes="[10, 20, 50]"
+          :page-sizes="[16, 20, 30, 50]"
           :total="pagination.total"
           layout="total, sizes, prev, pager, next, jumper"
           @size-change="fetchData"
@@ -323,7 +323,7 @@ const searchForm = reactive({
 
 const pagination = reactive({
   page: 1,
-  size: 10,
+  size: 16,
   total: 0
 })
 
