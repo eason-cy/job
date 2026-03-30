@@ -1,110 +1,96 @@
 <template>
   <div class="bagu-list">
-    <!-- 统计卡片 -->
-    <el-row :gutter="16" class="stat-cards">
-      <el-col :span="6">
-        <el-card shadow="hover" class="stat-card card-hover">
-          <div class="stat-content">
-            <div class="stat-value">{{ statistics.total }}</div>
-            <div class="stat-label">题目总数</div>
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card" v-for="(stat, index) in statsData" :key="stat.label" :style="{ '--card-index': index }">
+        <div class="stat-card-inner">
+          <div class="stat-icon-wrapper" :style="{ background: stat.gradient }">
+            <component :is="stat.icon" :size="24" />
           </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="stat-card card-hover">
-          <div class="stat-content">
-            <div class="stat-value need-review-val">{{ statistics.needReview }}</div>
-            <div class="stat-label">需要复习</div>
+          <div class="stat-data">
+            <div class="stat-value">{{ stat.value }}</div>
+            <div class="stat-label">{{ stat.label }}</div>
           </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="stat-card card-hover">
-          <div class="stat-content">
-            <div class="stat-value normal">{{ statistics.byFamiliarity[2] || 0 }}</div>
-            <div class="stat-label">一般</div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="stat-card card-hover">
-          <div class="stat-content">
-            <div class="stat-value mastered">{{ statistics.byFamiliarity[3] || 0 }}</div>
-            <div class="stat-label">已掌握</div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </div>
+      </div>
+    </div>
 
-    <!-- 搜索栏 -->
-    <el-card class="search-card card-hover">
-      <el-form :inline="true">
-        <el-form-item label="关键词">
+    <!-- Search Section -->
+    <div class="search-section">
+      <el-form :inline="true" class="search-form">
+        <el-form-item label="关键词" class="search-item">
           <el-input
             v-model="searchForm.keyword"
             placeholder="搜索问题或答案"
             clearable
-            style="width: 180px"
+            class="search-input"
             @keyup.enter="handleSearch"
           />
         </el-form-item>
-        <el-form-item label="分类">
-          <el-select v-model="searchForm.category" placeholder="全部" clearable style="width: 120px">
+        <el-form-item label="分类" class="search-item">
+          <el-select v-model="searchForm.category" placeholder="全部" clearable filterable class="search-select">
             <el-option v-for="cat in categories" :key="cat" :label="cat" :value="cat" />
           </el-select>
         </el-form-item>
-        <el-form-item label="熟悉度">
-          <el-select v-model="searchForm.familiarity" placeholder="全部" clearable style="width: 100px">
+        <el-form-item label="熟悉度" class="search-item">
+          <el-select v-model="searchForm.familiarity" placeholder="全部" clearable class="search-select">
             <el-option label="不熟" :value="1" />
             <el-option label="一般" :value="2" />
             <el-option label="熟练" :value="3" />
           </el-select>
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
-          <el-button @click="resetSearch">重置</el-button>
-          <el-button type="success" class="add-btn" @click="openDialog()">
-            <el-icon><Plus /></el-icon>
-            新增八股题
+        <el-form-item class="search-actions">
+          <el-button type="primary" class="search-btn btn-glow" @click="handleSearch">
+            <el-icon><Search /></el-icon>搜索
+          </el-button>
+          <el-button class="reset-btn" @click="resetSearch">重置</el-button>
+          <el-button type="primary" class="add-btn btn-glow" @click="openDialog()">
+            <el-icon><Plus /></el-icon>新增题目
           </el-button>
         </el-form-item>
       </el-form>
-    </el-card>
+    </div>
 
-    <!-- 列表 -->
-    <el-card class="table-card card-hover">
+    <!-- Table Section -->
+    <div class="table-section">
       <div class="table-wrapper">
-        <el-table :data="tableData" stripe class="custom-table" table-layout="auto">
-        <el-table-column label="问题" min-width="250">
-          <template #default="{ row }">
-            <div class="question-cell" @click="openDetail(row)">
-              {{ row.question }}
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="category" label="分类" width="100">
-          <template #default="{ row }">
-            <el-tag size="small" type="info">{{ row.category }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="熟悉度" width="140">
-          <template #default="{ row }">
-            <el-rate v-model="row.familiarity" :max="3" @change="updateFamiliarity(row)" />
-          </template>
-        </el-table-column>
-        <el-table-column prop="reviewCount" label="复习次数" width="90" />
-        <el-table-column label="上次复习" width="100">
-          <template #default="{ row }">
-            {{ row.lastReviewDate || '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="140" fixed="right">
-          <template #default="{ row }">
-            <el-button size="small" type="primary" link @click="openDialog(row)">编辑</el-button>
-            <el-button size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+        <el-table :data="tableData" stripe class="custom-table" table-layout="auto" row-key="id">
+          <el-table-column label="问题" min-width="280">
+            <template #default="{ row }">
+              <div class="question-cell" @click="openDetail(row)">
+                {{ row.question }}
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="category" label="分类" width="120">
+            <template #default="{ row }">
+              <el-tag size="small" class="category-tag">{{ row.category }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="熟悉度" width="150">
+            <template #default="{ row }">
+              <el-rate v-model="row.familiarity" :max="3" @change="updateFamiliarity(row)" />
+            </template>
+          </el-table-column>
+          <el-table-column prop="reviewCount" label="复习次数" width="100">
+            <template #default="{ row }">
+              <span class="review-num">{{ row.reviewCount || 0 }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="上次复习" width="110">
+            <template #default="{ row }">
+              <span class="date-text">{{ row.lastReviewDate || '-' }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="140" fixed="right">
+            <template #default="{ row }">
+              <div class="action-buttons">
+                <el-button size="small" type="primary" link class="action-link" @click="openDialog(row)">编辑</el-button>
+                <el-button size="small" type="danger" link class="action-link" @click="handleDelete(row)">删除</el-button>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
       </div>
 
       <div class="pagination-wrapper">
@@ -118,11 +104,11 @@
           @current-change="fetchData"
         />
       </div>
-    </el-card>
+    </div>
 
-    <!-- 新增/编辑对话框 -->
-    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑八股题' : '新增八股题'" width="600px" class="dialog-card" destroy-on-close>
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+    <!-- Add/Edit Dialog -->
+    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑八股题' : '新增八股题'" width="620px" class="dialog-card" destroy-on-close>
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px" class="dialog-form">
         <el-form-item label="问题" prop="question">
           <el-input v-model="form.question" placeholder="请输入问题" />
         </el-form-item>
@@ -149,21 +135,25 @@
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" class="submit-btn" @click="handleSubmit">确定</el-button>
+        <el-button type="primary" class="submit-btn btn-glow" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
 
-    <!-- 详情对话框 -->
-    <el-dialog v-model="detailVisible" title="题目详情" width="700px" class="dialog-card" destroy-on-close>
-      <el-descriptions :column="1" border>
-        <el-descriptions-item label="问题">{{ detailData.question }}</el-descriptions-item>
+    <!-- Detail Dialog -->
+    <el-dialog v-model="detailVisible" title="题目详情" width="720px" class="dialog-card" destroy-on-close>
+      <el-descriptions :column="1" border class="detail-descriptions">
+        <el-descriptions-item label="问题">
+          <div class="question-text">{{ detailData.question }}</div>
+        </el-descriptions-item>
         <el-descriptions-item label="分类">
-          <el-tag size="small" type="info">{{ detailData.category }}</el-tag>
+          <el-tag size="small" class="category-tag">{{ detailData.category }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="熟悉度">
           <el-rate v-model="detailData.familiarity" :max="3" @change="updateDetailFamiliarity" />
         </el-descriptions-item>
-        <el-descriptions-item label="复习次数">{{ detailData.reviewCount || 0 }}</el-descriptions-item>
+        <el-descriptions-item label="复习次数">
+          <span class="review-num">{{ detailData.reviewCount || 0 }}</span>
+        </el-descriptions-item>
       </el-descriptions>
 
       <el-divider content-position="left">答案</el-divider>
@@ -173,15 +163,16 @@
 
       <template #footer>
         <el-button @click="detailVisible = false">关闭</el-button>
-        <el-button type="primary" @click="openDialog(detailData)">编辑</el-button>
+        <el-button type="primary" class="submit-btn btn-glow" @click="openDialog(detailData)">编辑</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Search, Plus, Notebook, Clock, CircleCheck, Star } from '@element-plus/icons-vue'
 import { baguApi } from '../api'
 
 const searchForm = reactive({
@@ -204,6 +195,13 @@ const statistics = ref({
   byFamiliarity: {},
   needReview: 0
 })
+
+const statsData = computed(() => [
+  { label: '题目总数', value: statistics.value.total, icon: Notebook, gradient: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)' },
+  { label: '需要复习', value: statistics.value.needReview, icon: Clock, gradient: 'linear-gradient(135deg, #f43f5e 0%, #fb7185 100%)' },
+  { label: '一般', value: statistics.value.byFamiliarity[2] || 0, icon: Star, gradient: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)' },
+  { label: '已掌握', value: statistics.value.byFamiliarity[3] || 0, icon: CircleCheck, gradient: 'linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%)' }
+])
 
 const dialogVisible = ref(false)
 const detailVisible = ref(false)
@@ -355,117 +353,258 @@ onMounted(() => {
 
 <style scoped>
 .bagu-list {
-  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1600px;
 }
 
-.stat-cards {
-  margin-bottom: 20px;
+/* === Stats Grid === */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
 }
 
 .stat-card {
-  border: none !important;
-  border-radius: var(--radius-lg) !important;
-  background: var(--bg-card) !important;
+  animation: fadeInUp 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: calc(var(--card-index, 0) * 80ms);
+  opacity: 0;
 }
 
-.stat-content {
-  text-align: center;
-  padding: 8px 0;
+.stat-card-inner {
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card-inner:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.stat-data {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .stat-value {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
   color: var(--text-primary);
-}
-
-.stat-value.need-review-val {
-  color: #ef4444;
-}
-
-.stat-value.normal {
-  color: #f59e0b;
-}
-
-.stat-value.mastered {
-  color: #22c55e;
+  letter-spacing: -0.02em;
 }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-muted);
-  margin-top: 4px;
+  font-weight: 500;
 }
 
-.search-card {
-  border: none !important;
-  border-radius: var(--radius-lg) !important;
-  background: var(--bg-card) !important;
-  margin-bottom: 16px;
+/* === Search Section === */
+.search-section {
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 20px 24px;
 }
 
-.search-btn {
+.search-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.search-item {
+  margin-bottom: 0 !important;
+}
+
+.search-item :deep(.el-form-item__label) {
+  font-weight: 500;
+}
+
+.search-input {
+  width: 180px;
+}
+
+.search-select {
+  width: 130px;
+}
+
+.search-actions {
+  margin-bottom: 0 !important;
+}
+
+.search-btn,
+.add-btn {
   background: var(--primary-gradient);
   border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
 }
 
-.add-btn {
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  border: none;
+.search-btn:hover,
+.add-btn:hover {
+  opacity: 0.9;
+  box-shadow: var(--glow-primary);
 }
 
-.table-card {
-  border: none !important;
-  border-radius: var(--radius-lg) !important;
-  background: var(--bg-card) !important;
+.reset-btn {
+  border: 1px solid var(--border-color);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
 }
 
-.pagination-wrapper {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
+/* === Table Section === */
+.table-section {
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.custom-table :deep(.el-table__cell) {
+  padding: 14px 12px;
+}
+
+.custom-table :deep(.el-table__row:hover > td) {
+  background-color: var(--bg-glass) !important;
 }
 
 .question-cell {
   cursor: pointer;
   color: var(--primary-color);
+  font-weight: 500;
+  transition: color 200ms ease;
 }
 
 .question-cell:hover {
+  color: var(--primary-dark);
   text-decoration: underline;
 }
 
-/* 表格横向滚动容器 */
-.table-wrapper {
-  overflow-x: auto;
-  position: relative;
+.category-tag {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
 }
 
-/* 美化滚动条 */
-.table-wrapper::-webkit-scrollbar {
-  height: 8px;
+.review-num {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
-.table-wrapper::-webkit-scrollbar-track {
+.date-text {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.action-link {
+  font-weight: 500;
+}
+
+.pagination-wrapper {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* === Dialog Styles === */
+.dialog-card :deep(.el-dialog) {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.dialog-card :deep(.el-dialog__header) {
+  background: var(--primary-gradient);
+  padding: 20px 24px;
+}
+
+.dialog-card :deep(.el-dialog__title) {
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.dialog-card :deep(.el-dialog__headerbtn .el-dialog__close) {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.dialog-card :deep(.el-dialog__body) {
+  padding: 28px 24px;
+  background: var(--bg-card);
+}
+
+.dialog-card :deep(.el-dialog__footer) {
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-color);
+  padding: 20px 24px;
+}
+
+.dialog-form :deep(.el-form-item__label) {
+  font-weight: 500;
+}
+
+.submit-btn {
+  background: var(--primary-gradient);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+
+.submit-btn:hover {
+  opacity: 0.9;
+  box-shadow: var(--glow-primary);
+}
+
+.detail-descriptions :deep(.el-descriptions__label) {
+  font-weight: 500;
   background: var(--bg-secondary);
-  border-radius: 4px;
 }
 
-.table-wrapper::-webkit-scrollbar-thumb {
-  background: var(--primary-color);
-  border-radius: 4px;
-}
-
-.table-wrapper::-webkit-scrollbar-thumb:hover {
-  opacity: 0.8;
+.question-text {
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .answer-content {
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
-  padding: 16px;
-  max-height: 300px;
+  padding: 20px;
+  max-height: 320px;
   overflow-y: auto;
+  border: 1px solid var(--border-light);
 }
 
 .answer-content pre {
@@ -474,33 +613,47 @@ onMounted(() => {
   margin: 0;
   font-family: inherit;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.7;
   color: var(--text-primary);
 }
 
-/* 对话框样式 */
-.dialog-card :deep(.el-dialog__header) {
-  background: var(--primary-gradient);
-  padding: 16px 20px;
-  margin: 0;
+/* === Scrollbar === */
+.table-wrapper::-webkit-scrollbar {
+  height: 8px;
 }
 
-.dialog-card :deep(.el-dialog__title) {
-  color: white;
-  font-weight: 600;
+.table-wrapper::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
 }
 
-.dialog-card :deep(.el-dialog__headerbtn .el-dialog__close) {
-  color: white;
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: var(--radius-full);
 }
 
-.dialog-card :deep(.el-dialog__body) {
-  padding: 24px;
-  background: var(--bg-card);
+.answer-content::-webkit-scrollbar {
+  width: 6px;
 }
 
-.submit-btn {
-  background: var(--primary-gradient);
-  border: none;
+.answer-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.answer-content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: var(--radius-full);
+}
+
+/* === Animations === */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

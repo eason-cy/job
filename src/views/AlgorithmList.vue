@@ -1,146 +1,120 @@
 <template>
   <div class="algorithm-list">
-    <!-- 统计卡片 -->
-    <el-row :gutter="16" class="stat-cards">
-      <el-col :span="4">
-        <el-card shadow="hover" class="stat-card card-hover">
-          <div class="stat-content">
-            <div class="stat-value">{{ statistics.total }}</div>
-            <div class="stat-label">题目总数</div>
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card" v-for="(stat, index) in statsData" :key="stat.label" :style="{ '--card-index': index }">
+        <div class="stat-card-inner">
+          <div class="stat-icon-wrapper" :style="{ background: stat.gradient }">
+            <component :is="stat.icon" :size="24" />
           </div>
-        </el-card>
-      </el-col>
-      <el-col :span="4">
-        <el-card shadow="hover" class="stat-card card-hover">
-          <div class="stat-content">
-            <div class="stat-value need-review-val">{{ statistics.needReview }}</div>
-            <div class="stat-label">需要复习</div>
+          <div class="stat-data">
+            <div class="stat-value">{{ stat.value }}</div>
+            <div class="stat-label">{{ stat.label }}</div>
           </div>
-        </el-card>
-      </el-col>
-      <el-col :span="4">
-        <el-card shadow="hover" class="stat-card card-hover">
-          <div class="stat-content">
-            <div class="stat-value easy">{{ statistics.byDifficulty.Easy || 0 }}</div>
-            <div class="stat-label">简单</div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="4">
-        <el-card shadow="hover" class="stat-card card-hover">
-          <div class="stat-content">
-            <div class="stat-value medium">{{ statistics.byDifficulty.Medium || 0 }}</div>
-            <div class="stat-label">中等</div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="4">
-        <el-card shadow="hover" class="stat-card card-hover">
-          <div class="stat-content">
-            <div class="stat-value hard">{{ statistics.byDifficulty.Hard || 0 }}</div>
-            <div class="stat-label">困难</div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="4">
-        <el-card shadow="hover" class="stat-card card-hover">
-          <div class="stat-content">
-            <div class="stat-value mastered">{{ statistics.byFamiliarity[3] || 0 }}</div>
-            <div class="stat-label">已掌握</div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </div>
+      </div>
+    </div>
 
-    <!-- 搜索栏 -->
-    <el-card class="search-card card-hover">
-      <el-form :inline="true">
-        <el-form-item label="关键词">
+    <!-- Search Section -->
+    <div class="search-section">
+      <el-form :inline="true" class="search-form">
+        <el-form-item label="关键词" class="search-item">
           <el-input
             v-model="searchForm.keyword"
             placeholder="题号或标题"
             clearable
-            style="width: 150px"
+            class="search-input"
             @keyup.enter="handleSearch"
           />
         </el-form-item>
-        <el-form-item label="难度">
-          <el-select v-model="searchForm.difficulty" placeholder="全部" clearable style="width: 100px">
+        <el-form-item label="难度" class="search-item">
+          <el-select v-model="searchForm.difficulty" placeholder="全部" clearable class="search-select">
             <el-option label="简单" value="Easy" />
             <el-option label="中等" value="Medium" />
             <el-option label="困难" value="Hard" />
           </el-select>
         </el-form-item>
-        <el-form-item label="熟悉度">
-          <el-select v-model="searchForm.familiarity" placeholder="全部" clearable style="width: 100px">
+        <el-form-item label="熟悉度" class="search-item">
+          <el-select v-model="searchForm.familiarity" placeholder="全部" clearable class="search-select">
             <el-option label="不熟" :value="1" />
             <el-option label="一般" :value="2" />
             <el-option label="熟练" :value="3" />
           </el-select>
         </el-form-item>
-        <el-form-item label="标签">
-          <el-select v-model="searchForm.tag" placeholder="全部" clearable style="width: 120px">
+        <el-form-item label="标签" class="search-item">
+          <el-select v-model="searchForm.tag" placeholder="全部" clearable filterable class="search-select">
             <el-option v-for="tag in allTags" :key="tag" :label="tag" :value="tag" />
           </el-select>
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
-          <el-button @click="resetSearch">重置</el-button>
-          <el-button type="success" class="add-btn" @click="openDialog()">
-            <el-icon><Plus /></el-icon>
-            新增题目
+        <el-form-item class="search-actions">
+          <el-button type="primary" class="search-btn btn-glow" @click="handleSearch">
+            <el-icon><Search /></el-icon>搜索
+          </el-button>
+          <el-button class="reset-btn" @click="resetSearch">重置</el-button>
+          <el-button type="primary" class="add-btn btn-glow" @click="openDialog()">
+            <el-icon><Plus /></el-icon>新增题目
           </el-button>
         </el-form-item>
       </el-form>
-    </el-card>
+    </div>
 
-    <!-- 列表 -->
-    <el-card class="table-card card-hover">
+    <!-- Table Section -->
+    <div class="table-section">
       <div class="table-wrapper">
-        <el-table :data="tableData" stripe class="custom-table" table-layout="auto" row-key="id">
-        <el-table-column prop="leetcodeId" label="题号" width="80" />
-        <el-table-column label="题目" min-width="200">
-          <template #default="{ row }">
-            <el-button link type="primary" @click="openUrl(row.url)">
-              {{ row.title }}
-            </el-button>
-          </template>
-        </el-table-column>
-        <el-table-column label="难度" width="80">
-          <template #default="{ row }">
-            <el-tag :type="getDifficultyType(row.difficulty)" size="small">
-              {{ getDifficultyLabel(row.difficulty) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="标签" min-width="180">
-          <template #default="{ row }">
-            <el-tag v-for="tag in row.tags?.slice(0, 3)" :key="tag" size="small" class="tag-item">
-              {{ tag }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="熟悉度" width="140">
-          <template #default="{ row }">
-            <el-rate v-model="row.familiarity" :max="3" @change="updateFamiliarity(row)" />
-          </template>
-        </el-table-column>
-        <el-table-column label="复习次数" width="110">
-          <template #default="{ row }">
-            <span>{{ row.reviewCount || 0 }}</span>
-            <el-button size="small" type="success" link @click="incrementReview(row)" style="margin-left: 4px;">
-              <el-icon><Plus /></el-icon>
-            </el-button>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="150" fixed="right">
-          <template #default="{ row }">
-            <el-button size="small" type="primary" link @click="openDetail(row)">详情</el-button>
-            <el-button size="small" type="warning" link @click="openDialog(row)">编辑</el-button>
-            <el-button size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+        <el-table :data="tableData" stripe class="custom-table" table-layout="auto" row-key="id" row-class-name="table-row">
+          <el-table-column prop="leetcodeId" label="题号" width="80">
+            <template #default="{ row }">
+              <span class="id-badge">#{{ row.leetcodeId }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="题目" min-width="220">
+            <template #default="{ row }">
+              <el-button link type="primary" class="title-link" @click="openUrl(row.url)">
+                {{ row.title }}
+              </el-button>
+            </template>
+          </el-table-column>
+          <el-table-column label="难度" width="100">
+            <template #default="{ row }">
+              <el-tag :type="getDifficultyType(row.difficulty)" size="small" class="difficulty-tag">
+                {{ getDifficultyLabel(row.difficulty) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="标签" min-width="180">
+            <template #default="{ row }">
+              <div class="tag-group">
+                <el-tag v-for="tag in row.tags?.slice(0, 3)" :key="tag" size="small" class="topic-tag">
+                  {{ tag }}
+                </el-tag>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="熟悉度" width="150">
+            <template #default="{ row }">
+              <el-rate v-model="row.familiarity" :max="3" @change="updateFamiliarity(row)" />
+            </template>
+          </el-table-column>
+          <el-table-column label="复习次数" width="130">
+            <template #default="{ row }">
+              <div class="review-count">
+                <span class="count-num">{{ row.reviewCount || 0 }}</span>
+                <el-button size="small" type="primary" class="review-btn" link @click="incrementReview(row)">
+                  <el-icon><Plus /></el-icon>
+                </el-button>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="160" fixed="right">
+            <template #default="{ row }">
+              <div class="action-buttons">
+                <el-button size="small" type="primary" link class="action-link" @click="openDetail(row)">详情</el-button>
+                <el-button size="small" type="warning" link class="action-link" @click="openDialog(row)">编辑</el-button>
+                <el-button size="small" type="danger" link class="action-link" @click="handleDelete(row)">删除</el-button>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
       </div>
 
       <div class="pagination-wrapper">
@@ -154,19 +128,19 @@
           @current-change="fetchData"
         />
       </div>
-    </el-card>
+    </div>
 
-    <!-- 新增/编辑对话框 -->
-    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑题目' : '新增题目'" width="550px" class="dialog-card" destroy-on-close>
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+    <!-- Add/Edit Dialog -->
+    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑题目' : '新增题目'" width="560px" class="dialog-card" destroy-on-close>
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px" class="dialog-form">
         <el-form-item label="题号" prop="leetcodeId">
-          <el-input v-model.number="form.leetcodeId" placeholder="LeetCode题号" style="width: 150px" />
+          <el-input v-model.number="form.leetcodeId" placeholder="LeetCode题号" style="width: 120px" />
         </el-form-item>
         <el-form-item label="标题" prop="title">
           <el-input v-model="form.title" placeholder="题目标题" />
         </el-form-item>
         <el-form-item label="链接" prop="url">
-          <el-input v-model="form.url" placeholder="题目链接 (如: https://leetcode.cn/problems/xxx/)" />
+          <el-input v-model="form.url" placeholder="https://leetcode.cn/problems/..." />
         </el-form-item>
         <el-form-item label="难度" prop="difficulty">
           <el-select v-model="form.difficulty" placeholder="选择难度">
@@ -184,23 +158,25 @@
           <el-rate v-model="form.familiarity" :max="3" show-text :texts="['不熟', '一般', '熟练']" />
         </el-form-item>
         <el-form-item label="笔记">
-          <el-input v-model="form.notes" type="textarea" :rows="3" placeholder="记录解题思路、注意事项等..." />
+          <el-input v-model="form.notes" type="textarea" :rows="4" placeholder="解题思路、注意事项..." />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" class="submit-btn" @click="handleSubmit">确定</el-button>
+        <el-button type="primary" class="submit-btn btn-glow" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
 
-    <!-- 详情对话框 -->
-    <el-dialog v-model="detailVisible" title="题目详情" width="600px" class="dialog-card" destroy-on-close>
-      <el-descriptions :column="1" border>
-        <el-descriptions-item label="题号">{{ detailData.leetcodeId }}</el-descriptions-item>
+    <!-- Detail Dialog -->
+    <el-dialog v-model="detailVisible" title="题目详情" width="640px" class="dialog-card" destroy-on-close>
+      <el-descriptions :column="1" border class="detail-descriptions">
+        <el-descriptions-item label="题号">
+          <span class="id-badge">#{{ detailData.leetcodeId }}</span>
+        </el-descriptions-item>
         <el-descriptions-item label="标题">{{ detailData.title }}</el-descriptions-item>
         <el-descriptions-item label="链接">
           <el-button link type="primary" @click="openUrl(detailData.url)">
-            {{ detailData.url }}
+            <el-icon><Link /></el-icon>打开题目
           </el-button>
         </el-descriptions-item>
         <el-descriptions-item label="难度">
@@ -209,16 +185,20 @@
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="标签">
-          <el-tag v-for="tag in detailData.tags" :key="tag" size="small" class="tag-item">{{ tag }}</el-tag>
+          <div class="tag-group">
+            <el-tag v-for="tag in detailData.tags" :key="tag" size="small" class="topic-tag">{{ tag }}</el-tag>
+          </div>
         </el-descriptions-item>
         <el-descriptions-item label="熟悉度">
           <el-rate v-model="detailData.familiarity" :max="3" @change="saveDetailFamiliarity" />
         </el-descriptions-item>
         <el-descriptions-item label="复习次数">
-          {{ detailData.reviewCount || 0 }}
-          <el-button size="small" type="success" link @click="incrementReviewDetail" style="margin-left: 4px;">
-            <el-icon><Plus /></el-icon>复习
-          </el-button>
+          <div class="review-count">
+            <span class="count-num">{{ detailData.reviewCount || 0 }}</span>
+            <el-button size="small" type="primary" class="review-btn" link @click="incrementReviewDetail">
+              <el-icon><Plus /></el-icon>复习
+            </el-button>
+          </div>
         </el-descriptions-item>
         <el-descriptions-item label="上次复习">{{ detailData.lastReviewDate || '未复习' }}</el-descriptions-item>
       </el-descriptions>
@@ -227,21 +207,23 @@
       <el-input
         v-model="detailData.notes"
         type="textarea"
-        :rows="4"
-        placeholder="记录解题思路、注意事项等..."
+        :rows="5"
+        placeholder="记录解题思路、注意事项..."
+        class="notes-input"
       />
 
       <template #footer>
         <el-button @click="detailVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveNotes">保存笔记</el-button>
+        <el-button type="primary" class="submit-btn btn-glow" @click="saveNotes">保存笔记</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Search, Plus, Link, Collection, Star, Clock, CircleCheck } from '@element-plus/icons-vue'
 import { algorithmApi } from '../api'
 import { leetcodeHot100 } from '../data/leetcodeHot100'
 
@@ -266,6 +248,15 @@ const statistics = ref({
   byFamiliarity: {},
   needReview: 0
 })
+
+const statsData = computed(() => [
+  { label: '题目总数', value: statistics.value.total, icon: Collection, gradient: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)' },
+  { label: '需要复习', value: statistics.value.needReview, icon: Clock, gradient: 'linear-gradient(135deg, #f43f5e 0%, #fb7185 100%)' },
+  { label: '简单', value: statistics.value.byDifficulty.Easy || 0, icon: CircleCheck, gradient: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)' },
+  { label: '中等', value: statistics.value.byDifficulty.Medium || 0, icon: Star, gradient: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)' },
+  { label: '困难', value: statistics.value.byDifficulty.Hard || 0, icon: Star, gradient: 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)' },
+  { label: '已掌握', value: statistics.value.byFamiliarity[3] || 0, icon: CircleCheck, gradient: 'linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%)' }
+])
 
 const dialogVisible = ref(false)
 const detailVisible = ref(false)
@@ -315,19 +306,14 @@ const fetchData = async () => {
   }
 }
 
-// 本地排序函数
 const sortTableData = () => {
   tableData.value.sort((a, b) => {
     const famA = a.familiarity || 1
     const famB = b.familiarity || 1
-    if (famA !== famB) {
-      return famA - famB
-    }
+    if (famA !== famB) return famA - famB
     const reviewA = a.reviewCount || 0
     const reviewB = b.reviewCount || 0
-    if (reviewA !== reviewB) {
-      return reviewB - reviewA
-    }
+    if (reviewA !== reviewB) return reviewB - reviewA
     return a.leetcodeId - b.leetcodeId
   })
 }
@@ -394,13 +380,9 @@ const openDialog = (row) => {
 const handleSubmit = async () => {
   await formRef.value.validate()
   try {
-    // 自动生成URL
     let url = form.url
     if (!url && form.title) {
-      // 根据标题生成slug
-      const slug = form.title.toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
+      const slug = form.title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-')
       url = `https://leetcode.cn/problems/${slug}/`
     }
 
@@ -435,12 +417,10 @@ const handleSubmit = async () => {
 const updateFamiliarity = async (row) => {
   try {
     const response = await algorithmApi.updateFamiliarity(row.id, row.familiarity)
-    // 本地更新数据
     const index = tableData.value.findIndex(item => item.id === row.id)
     if (index !== -1) {
       tableData.value[index] = { ...tableData.value[index], ...response.data }
     }
-    // 本地排序
     sortTableData()
     ElMessage.success('已更新熟悉度')
     fetchStatistics()
@@ -449,16 +429,13 @@ const updateFamiliarity = async (row) => {
   }
 }
 
-// 增加复习次数
 const incrementReview = async (row) => {
   try {
     const response = await algorithmApi.incrementReview(row.id)
-    // 本地更新数据
     const index = tableData.value.findIndex(item => item.id === row.id)
     if (index !== -1) {
       tableData.value[index] = { ...tableData.value[index], ...response.data }
     }
-    // 本地排序
     sortTableData()
     ElMessage.success('已记录复习')
   } catch (error) {
@@ -469,14 +446,11 @@ const incrementReview = async (row) => {
 const saveDetailFamiliarity = async () => {
   try {
     const response = await algorithmApi.updateFamiliarity(detailData.value.id, detailData.value.familiarity)
-    // 更新详情数据
     detailData.value = { ...detailData.value, ...response.data }
-    // 本地更新列表数据
     const index = tableData.value.findIndex(item => item.id === detailData.value.id)
     if (index !== -1) {
       tableData.value[index] = { ...tableData.value[index], ...response.data }
     }
-    // 本地排序
     sortTableData()
     ElMessage.success('已更新熟悉度')
     fetchStatistics()
@@ -485,18 +459,14 @@ const saveDetailFamiliarity = async () => {
   }
 }
 
-// 详情页增加复习次数
 const incrementReviewDetail = async () => {
   try {
     const response = await algorithmApi.incrementReview(detailData.value.id)
-    // 更新详情数据
     detailData.value = { ...detailData.value, ...response.data }
-    // 本地更新列表数据
     const index = tableData.value.findIndex(item => item.id === detailData.value.id)
     if (index !== -1) {
       tableData.value[index] = { ...tableData.value[index], ...response.data }
     }
-    // 本地排序
     sortTableData()
     ElMessage.success('已记录复习')
   } catch (error) {
@@ -550,20 +520,16 @@ const getDifficultyLabel = (difficulty) => {
   return map[difficulty] || difficulty
 }
 
-// 初始化：自动导入Hot 100题目
 const initHot100 = async () => {
   try {
     const data = localStorage.getItem('job_tracker_data')
     const parsed = data ? JSON.parse(data) : {}
     const algorithms = parsed.algorithms || []
 
-    // 检查是否需要导入或补充题目
     if (algorithms.length === 0) {
-      // 完全空，全部导入
       const result = await algorithmApi.batchImport(leetcodeHot100)
       console.log(`已自动导入LeetCode Hot 100题目，共${result.data.imported}题`)
     } else if (algorithms.length < leetcodeHot100.length) {
-      // 有题目但不足，补充缺少的
       const existingIds = new Set(algorithms.map(item => item.leetcodeId))
       const missingQuestions = leetcodeHot100.filter(q => !existingIds.has(q.leetcodeId))
       if (missingQuestions.length > 0) {
@@ -586,147 +552,299 @@ onMounted(async () => {
 
 <style scoped>
 .algorithm-list {
-  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1600px;
 }
 
-.stat-cards {
-  margin-bottom: 20px;
+/* === Stats Grid === */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
 }
 
 .stat-card {
-  border: none !important;
-  border-radius: var(--radius-lg) !important;
-  background: var(--bg-card) !important;
+  animation: fadeInUp 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: calc(var(--card-index, 0) * 60ms);
+  opacity: 0;
 }
 
-.stat-content {
-  text-align: center;
-  padding: 8px 0;
+.stat-card-inner {
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card-inner:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-icon-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.stat-data {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .stat-value {
   font-size: 28px;
   font-weight: 700;
   color: var(--text-primary);
-}
-
-.stat-value.need-review-val {
-  color: #ef4444;
-}
-
-.stat-value.easy {
-  color: #22c55e;
-}
-
-.stat-value.medium {
-  color: #f59e0b;
-}
-
-.stat-value.hard {
-  color: #ef4444;
-}
-
-.stat-value.mastered {
-  color: #3b82f6;
+  letter-spacing: -0.02em;
 }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--text-muted);
-  margin-top: 4px;
+  font-weight: 500;
 }
 
-.search-card {
-  border: none !important;
-  border-radius: var(--radius-lg) !important;
-  background: var(--bg-card) !important;
-  margin-bottom: 16px;
+/* === Search Section === */
+.search-section {
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 20px 24px;
 }
 
-.search-btn {
+.search-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.search-item {
+  margin-bottom: 0 !important;
+}
+
+.search-item :deep(.el-form-item__label) {
+  font-weight: 500;
+}
+
+.search-input {
+  width: 140px;
+}
+
+.search-select {
+  width: 110px;
+}
+
+.search-actions {
+  margin-bottom: 0 !important;
+}
+
+.search-btn,
+.add-btn {
   background: var(--primary-gradient);
   border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
 }
 
-.add-btn {
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  border: none;
+.search-btn:hover,
+.add-btn:hover {
+  opacity: 0.9;
+  box-shadow: var(--glow-primary);
 }
 
-.table-card {
-  border: none !important;
-  border-radius: var(--radius-lg) !important;
-  background: var(--bg-card) !important;
+.reset-btn {
+  border: 1px solid var(--border-color);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+}
+
+/* === Table Section === */
+.table-section {
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.custom-table :deep(.el-table__cell) {
+  padding: 14px 12px;
+}
+
+.custom-table :deep(.el-table__row:hover > td) {
+  background-color: var(--bg-glass) !important;
+}
+
+.id-badge {
+  display: inline-flex;
+  padding: 4px 10px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.title-link {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.difficulty-tag {
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+}
+
+.tag-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.topic-tag {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+}
+
+.review-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.count-num {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.review-btn {
+  opacity: 0.7;
+}
+
+.review-btn:hover {
+  opacity: 1;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.action-link {
+  font-weight: 500;
 }
 
 .pagination-wrapper {
-  margin-top: 20px;
+  margin-top: 24px;
   display: flex;
   justify-content: flex-end;
 }
 
-.tag-item {
-  margin-right: 4px;
-  margin-bottom: 2px;
+/* === Dialog Styles === */
+.dialog-card :deep(.el-dialog) {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
 }
 
-/* 表格横向滚动容器 */
-.table-wrapper {
-  overflow-x: auto;
-  position: relative;
+.dialog-card :deep(.el-dialog__header) {
+  background: var(--primary-gradient);
+  padding: 20px 24px;
 }
 
-/* 表格行过渡动画 */
-:deep(.el-table__row) {
-  transition: all 0.3s ease;
+.dialog-card :deep(.el-dialog__title) {
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
 }
 
-:deep(.el-table__body-wrapper) {
-  transition: all 0.3s ease;
+.dialog-card :deep(.el-dialog__headerbtn .el-dialog__close) {
+  color: rgba(255, 255, 255, 0.9);
 }
 
-/* 美化滚动条 */
+.dialog-card :deep(.el-dialog__body) {
+  padding: 28px 24px;
+  background: var(--bg-card);
+}
+
+.dialog-card :deep(.el-dialog__footer) {
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-color);
+  padding: 20px 24px;
+}
+
+.dialog-form :deep(.el-form-item__label) {
+  font-weight: 500;
+}
+
+.submit-btn {
+  background: var(--primary-gradient);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+
+.submit-btn:hover {
+  opacity: 0.9;
+  box-shadow: var(--glow-primary);
+}
+
+.detail-descriptions :deep(.el-descriptions__label) {
+  font-weight: 500;
+  background: var(--bg-secondary);
+}
+
+.notes-input :deep(.el-textarea__inner) {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+/* === Scrollbar === */
 .table-wrapper::-webkit-scrollbar {
   height: 8px;
 }
 
 .table-wrapper::-webkit-scrollbar-track {
   background: var(--bg-secondary);
-  border-radius: 4px;
+  border-radius: var(--radius-full);
 }
 
 .table-wrapper::-webkit-scrollbar-thumb {
   background: var(--primary-color);
-  border-radius: 4px;
+  border-radius: var(--radius-full);
 }
 
-.table-wrapper::-webkit-scrollbar-thumb:hover {
-  opacity: 0.8;
-}
-
-/* 对话框样式 */
-.dialog-card :deep(.el-dialog__header) {
-  background: var(--primary-gradient);
-  padding: 16px 20px;
-  margin: 0;
-}
-
-.dialog-card :deep(.el-dialog__title) {
-  color: white;
-  font-weight: 600;
-}
-
-.dialog-card :deep(.el-dialog__headerbtn .el-dialog__close) {
-  color: white;
-}
-
-.dialog-card :deep(.el-dialog__body) {
-  padding: 24px;
-  background: var(--bg-card);
-}
-
-.submit-btn {
-  background: var(--primary-gradient);
-  border: none;
+/* === Animations === */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

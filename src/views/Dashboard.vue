@@ -1,120 +1,78 @@
 <template>
   <div class="dashboard">
-    <!-- 统计卡片 -->
-    <el-row :gutter="20" class="stat-cards" justify="center">
-      <el-col :span="4">
-        <el-card shadow="hover" class="stat-card-wrapper card-hover">
-          <div class="stat-card">
-            <div class="stat-icon pending">
-              <el-icon :size="32"><Clock /></el-icon>
+    <!-- Hero Stats Grid -->
+    <div class="stats-hero">
+      <div
+        class="stat-card"
+        v-for="(stat, index) in statusStats"
+        :key="stat.status"
+        :style="{ '--card-index': index }"
+      >
+        <div class="stat-card-inner">
+          <div class="stat-glow" :style="{ background: stat.gradient }"></div>
+          <div class="stat-visual">
+            <div class="stat-icon-wrapper" :style="{ background: stat.gradient }">
+              <component :is="stat.icon" :size="28" />
             </div>
-            <div class="stat-info">
-              <div class="stat-value number-animate">{{ getStatusCount('待处理') }}</div>
-              <div class="stat-label">待处理</div>
-            </div>
+            <div class="stat-ring"></div>
           </div>
-        </el-card>
-      </el-col>
-      <el-col :span="4">
-        <el-card shadow="hover" class="stat-card-wrapper card-hover">
-          <div class="stat-card">
-            <div class="stat-icon assessment">
-              <el-icon :size="32"><EditPen /></el-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value number-animate">{{ getStatusCount('测评中') }}</div>
-              <div class="stat-label">测评中</div>
-            </div>
+          <div class="stat-data">
+            <div class="stat-value number-animate">{{ stat.count }}</div>
+            <div class="stat-label">{{ stat.label }}</div>
           </div>
-        </el-card>
-      </el-col>
-      <el-col :span="4">
-        <el-card shadow="hover" class="stat-card-wrapper card-hover">
-          <div class="stat-card">
-            <div class="stat-icon written-test">
-              <el-icon :size="32"><Edit /></el-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value number-animate">{{ getStatusCount('笔试中') }}</div>
-              <div class="stat-label">笔试中</div>
-            </div>
+          <div class="stat-indicator">
+            <div class="indicator-bar" :style="{ background: stat.gradient, width: stat.percentage + '%' }"></div>
           </div>
-        </el-card>
-      </el-col>
-      <el-col :span="4">
-        <el-card shadow="hover" class="stat-card-wrapper card-hover">
-          <div class="stat-card">
-            <div class="stat-icon interviewing">
-              <el-icon :size="32"><ChatDotRound /></el-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value number-animate">{{ getStatusCount('面试中') }}</div>
-              <div class="stat-label">面试中</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="4">
-        <el-card shadow="hover" class="stat-card-wrapper card-hover">
-          <div class="stat-card">
-            <div class="stat-icon offer">
-              <el-icon :size="32"><Trophy /></el-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value number-animate">{{ getStatusCount('已offer') }}</div>
-              <div class="stat-label">Offer</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="4">
-        <el-card shadow="hover" class="stat-card-wrapper card-hover">
-          <div class="stat-card">
-            <div class="stat-icon eliminated">
-              <el-icon :size="32"><CircleClose /></el-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value number-animate">{{ getStatusCount('已淘汰') }}</div>
-              <div class="stat-label">已淘汰</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </div>
+      </div>
+    </div>
 
-    <!-- 快捷操作 -->
-    <el-card class="quick-actions-card card-hover">
-      <div class="quick-actions">
-        <el-button type="primary" class="action-btn btn-click" @click="$router.push('/applications')">
-          <el-icon><Plus /></el-icon>新增投递
-        </el-button>
-        <el-button type="primary" class="action-btn btn-click" @click="$router.push('/applications')">
-          <el-icon><List /></el-icon>查看列表
-        </el-button>
-        <el-button type="primary" class="action-btn btn-click" @click="handleExport">
-          <el-icon><Download /></el-icon>导出备份
-        </el-button>
+    <!-- Quick Actions Section -->
+    <div class="actions-section">
+      <div class="section-header">
+        <h3 class="section-title">快捷操作</h3>
+        <div class="section-accent"></div>
+      </div>
+      <div class="actions-grid">
+        <div class="action-card btn-click" @click="$router.push('/applications')">
+          <div class="action-icon">
+            <el-icon :size="24"><Plus /></el-icon>
+          </div>
+          <span class="action-text">新增投递</span>
+        </div>
+        <div class="action-card btn-click" @click="$router.push('/applications')">
+          <div class="action-icon">
+            <el-icon :size="24"><List /></el-icon>
+          </div>
+          <span class="action-text">查看列表</span>
+        </div>
+        <div class="action-card btn-click" @click="handleExport">
+          <div class="action-icon">
+            <el-icon :size="24"><Download /></el-icon>
+          </div>
+          <span class="action-text">导出备份</span>
+        </div>
         <el-upload class="action-upload" :show-file-list="false" accept=".json" :before-upload="handleImport">
-          <el-button type="primary" class="action-btn btn-click">
-            <el-icon><Upload /></el-icon>导入备份
-          </el-button>
+          <div class="action-card btn-click">
+            <div class="action-icon">
+              <el-icon :size="24"><Upload /></el-icon>
+            </div>
+            <span class="action-text">导入备份</span>
+          </div>
         </el-upload>
       </div>
-    </el-card>
+    </div>
 
-    <!-- 图表 -->
-    <el-row :gutter="20" class="charts">
-      <el-col :span="24">
-        <el-card class="chart-card card-hover">
-          <template #header>
-            <div class="card-header">
-              <span>状态分布</span>
-            </div>
-          </template>
-          <div ref="pieChartRef" class="chart-container"></div>
-        </el-card>
-      </el-col>
-    </el-row>
+    <!-- Charts Section -->
+    <div class="charts-section">
+      <div class="section-header">
+        <h3 class="section-title">状态分布</h3>
+        <div class="section-accent"></div>
+      </div>
+      <div class="chart-container-wrapper">
+        <div ref="pieChartRef" class="chart-container"></div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -123,6 +81,7 @@ import { ref, onMounted, computed, onUnmounted } from 'vue'
 import * as echarts from 'echarts'
 import { applicationApi, exportData, importData } from '../api'
 import { ElMessage } from 'element-plus'
+import { Clock, EditPen, Edit, ChatDotRound, Trophy, CircleClose, Plus, List, Download, Upload } from '@element-plus/icons-vue'
 
 const statistics = ref({
   total: 0,
@@ -134,9 +93,23 @@ const statistics = ref({
 const pieChartRef = ref(null)
 let pieChart = null
 
-const getStatusCount = (status) => {
-  return statistics.value.statusDistribution[status] || 0
-}
+const statusStats = computed(() => {
+  const configs = [
+    { status: '待处理', label: '待处理', icon: Clock, gradient: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)' },
+    { status: '测评中', label: '测评中', icon: EditPen, gradient: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)' },
+    { status: '笔试中', label: '笔试中', icon: Edit, gradient: 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)' },
+    { status: '面试中', label: '面试中', icon: ChatDotRound, gradient: 'linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%)' },
+    { status: '已offer', label: '已获Offer', icon: Trophy, gradient: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)' },
+    { status: '已淘汰', label: '已淘汰', icon: CircleClose, gradient: 'linear-gradient(135deg, #64748b 0%, #94a3b8 100%)' }
+  ]
+
+  const total = statistics.value.total || 1
+  return configs.map(config => ({
+    ...config,
+    count: statistics.value.statusDistribution[config.status] || 0,
+    percentage: Math.round((statistics.value.statusDistribution[config.status] || 0) / total * 100)
+  }))
+})
 
 const fetchStatistics = async () => {
   try {
@@ -151,24 +124,22 @@ const fetchStatistics = async () => {
 const getChartColors = () => {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
   if (isDark) {
-    // 暗色模式配色方案
     return {
-      '待处理': '#60a5fa',
+      '待处理': '#0ea5e9',
       '测评中': '#fbbf24',
       '笔试中': '#a78bfa',
-      '面试中': '#22d3ee',
-      '已offer': '#4ade80',
+      '面试中': '#2dd4bf',
+      '已offer': '#34d399',
       '已淘汰': '#94a3b8'
     }
   }
-  // 亮色模式配色方案
   return {
-    '待处理': '#3b82f6',
+    '待处理': '#0ea5e9',
     '测评中': '#f59e0b',
     '笔试中': '#8b5cf6',
-    '面试中': '#06b6d4',
-    '已offer': '#22c55e',
-    '已淘汰': '#6b7280'
+    '面试中': '#14b8a6',
+    '已offer': '#10b981',
+    '已淘汰': '#64748b'
   }
 }
 
@@ -181,13 +152,12 @@ const renderPieChart = () => {
 
   pieChart = echarts.init(pieChartRef.value)
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
-
   const colorMap = getChartColors()
 
   const data = Object.entries(statistics.value.statusDistribution).map(([name, value]) => ({
     name,
     value,
-    itemStyle: { color: colorMap[name] || '#409eff' }
+    itemStyle: { color: colorMap[name] || '#10b981' }
   }))
 
   const option = {
@@ -195,37 +165,59 @@ const renderPieChart = () => {
       trigger: 'item',
       formatter: '{b}: {c} ({d}%)',
       backgroundColor: isDark ? '#1e293b' : '#fff',
-      borderColor: isDark ? '#334155' : '#e4e7ed',
+      borderColor: isDark ? '#334155' : '#e2e8f0',
+      borderRadius: 12,
+      padding: [12, 16],
       textStyle: {
-        color: isDark ? '#f1f5f9' : '#1f2937'
-      }
+        color: isDark ? '#f1f5f9' : '#0f172a',
+        fontSize: 14,
+        fontWeight: 500
+      },
+      extraCssText: 'box-shadow: 0 8px 16px rgba(0,0,0,0.1);'
     },
     legend: {
-      orient: 'vertical',
-      left: 'left',
-      top: 'center',
+      orient: 'horizontal',
+      bottom: 24,
+      left: 'center',
+      itemWidth: 12,
+      itemHeight: 12,
+      itemGap: 24,
       textStyle: {
-        color: isDark ? '#94a3b8' : '#6b7280'
-      }
+        color: isDark ? '#94a3b8' : '#64748b',
+        fontSize: 13,
+        fontWeight: 500
+      },
+      icon: 'circle'
     },
     series: [
       {
         type: 'pie',
-        radius: ['40%', '70%'],
-        center: ['60%', '50%'],
-        data,
+        radius: ['45%', '72%'],
+        center: ['50%', '45%'],
+        avoidLabelOverlap: true,
+        itemStyle: {
+          borderRadius: 8,
+          borderColor: isDark ? '#1e293b' : '#fff',
+          borderWidth: 3
+        },
         label: {
-          show: true,
-          formatter: '{b}: {c}',
-          color: isDark ? '#94a3b8' : '#6b7280'
+          show: false
         },
         emphasis: {
+          label: {
+            show: true,
+            fontSize: 16,
+            fontWeight: 700,
+            color: isDark ? '#f1f5f9' : '#0f172a'
+          },
           itemStyle: {
-            shadowBlur: 10,
+            shadowBlur: 20,
             shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
+            shadowOffsetY: 4,
+            shadowColor: 'rgba(0, 0, 0, 0.25)'
           }
-        }
+        },
+        data
       }
     ]
   }
@@ -249,7 +241,6 @@ const handleImport = async (file) => {
   return false
 }
 
-// 监听主题变化
 const handleThemeChange = () => {
   renderPieChart()
 }
@@ -258,17 +249,14 @@ let themeObserver = null
 
 onMounted(() => {
   fetchStatistics()
-  // 监听主题变化
   themeObserver = new MutationObserver(handleThemeChange)
   themeObserver.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['data-theme']
   })
-  // 监听窗口大小变化，重绘图表
   window.addEventListener('resize', handleResize)
 })
 
-// 窗口大小变化时重绘图表
 const handleResize = () => {
   if (pieChart) {
     pieChart.resize()
@@ -288,158 +276,239 @@ onUnmounted(() => {
 
 <style scoped>
 .dashboard {
-  padding: 0;
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 1400px;
 }
 
-.stat-cards {
-  margin-bottom: 20px;
-}
-
-.stat-card-wrapper {
-  border: none !important;
-  border-radius: var(--radius-lg) !important;
-  background: var(--bg-card) !important;
-  backdrop-filter: var(--glass-blur);
-}
-
-.stat-card-wrapper:hover {
-  box-shadow: var(--shadow-lg) !important;
+/* === Stats Hero Grid === */
+.stats-hero {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 20px;
 }
 
 .stat-card {
-  display: flex;
-  align-items: center;
-  padding: 12px 0;
+  position: relative;
+  animation: fadeInUp 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: calc(var(--card-index, 0) * 80ms);
+  opacity: 0;
 }
 
-.stat-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--radius-md);
+.stat-card-inner {
+  position: relative;
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.stat-card-inner:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--border-strong);
+}
+
+.stat-glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+.stat-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.stat-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  margin-right: 16px;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 2;
 }
 
-.stat-icon.pending {
-  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+.stat-ring {
+  position: absolute;
+  width: 68px;
+  height: 68px;
+  border: 2px dashed var(--border-color);
+  border-radius: 50%;
+  opacity: 0.5;
 }
 
-.stat-icon.assessment {
-  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
-}
-
-.stat-icon.written-test {
-  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
-}
-
-.stat-icon.interviewing {
-  background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);
-}
-
-.stat-icon.offer {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-}
-
-.stat-icon.eliminated {
-  background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
-}
-
-.stat-info {
-  flex: 1;
+.stat-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
 .stat-value {
-  font-size: 32px;
-  font-weight: 700;
+  font-size: 36px;
+  font-weight: 800;
   color: var(--text-primary);
-  line-height: 1.4;
+  line-height: 1;
+  letter-spacing: -0.04em;
 }
 
 .stat-label {
-  font-size: 15px;
+  font-size: 13px;
   color: var(--text-muted);
-  margin-top: 6px;
-  line-height: 1.6;
+  font-weight: 500;
+  text-align: center;
 }
 
-.charts {
-  margin-top: 20px;
+.stat-indicator {
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
 }
 
-.chart-card {
-  border: none !important;
-  border-radius: var(--radius-lg) !important;
-  background: var(--bg-card) !important;
+.indicator-bar {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  animation-delay: calc(var(--card-index, 0) * 100ms + 400ms);
 }
 
-.card-header {
+/* === Section Headers === */
+.section-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  font-weight: 600;
-  font-size: 16px;
-  color: var(--text-primary);
-}
-
-.chart-container {
-  height: 320px;
-}
-
-.quick-actions-card {
+  gap: 12px;
   margin-bottom: 20px;
-  border: none !important;
-  border-radius: var(--radius-lg) !important;
-  background: var(--bg-card) !important;
-  backdrop-filter: var(--glass-blur);
 }
 
-.quick-actions {
-  display: flex;
-  flex-wrap: wrap;
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.section-accent {
+  width: 32px;
+  height: 4px;
+  background: var(--primary-gradient);
+  border-radius: var(--radius-full);
+}
+
+/* === Actions Section === */
+.actions-section {
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  padding: 12px 0;
-  justify-content: flex-start;
+}
+
+.action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.action-card:hover {
+  background: var(--primary-gradient-subtle);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.action-card:hover .action-icon {
+  background: var(--primary-gradient);
+  color: white;
+}
+
+.action-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  color: var(--primary-color);
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.action-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.action-card:hover .action-text {
+  color: var(--primary-color);
 }
 
 .action-upload {
-  display: inline-flex !important;
-  width: auto !important;
+  display: block !important;
 }
 
 .action-upload :deep(.el-upload) {
-  display: inline-flex !important;
+  display: block !important;
 }
 
-.action-upload :deep(.el-upload-list) {
-  display: none !important;
+/* === Charts Section === */
+.charts-section {
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 24px;
 }
 
-.action-btn {
-  width: 140px;
-  height: 44px;
-  font-size: 15px;
-  border-radius: var(--radius-sm);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: var(--primary-gradient);
-  border: none;
+.chart-container-wrapper {
+  height: 340px;
 }
 
-.action-btn:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+.chart-container {
+  width: 100%;
+  height: 100%;
 }
 
-.action-btn .el-icon {
-  width: 16px;
-  flex-shrink: 0;
+/* === Animations === */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

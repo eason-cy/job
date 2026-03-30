@@ -1,99 +1,109 @@
 <template>
   <div class="application-list">
-    <!-- 搜索栏 -->
-    <el-card class="search-card card-hover">
-      <el-form :inline="true">
-        <el-form-item label="公司名称" class="input-focus">
-          <el-input
-            v-model="searchForm.companyName"
-            placeholder="请输入公司名称"
-            clearable
-            @keyup.enter="handleSearch"
-          />
-        </el-form-item>
-        <el-form-item label="状态" class="input-focus">
-          <el-select v-model="searchForm.status" placeholder="全部状态" clearable style="width: 140px">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
-          <el-button class="reset-btn" @click="resetSearch">重置</el-button>
-          <el-button type="primary" class="add-btn" @click="openDialog()">
-            <el-icon><Plus /></el-icon>
-            新增投递
-          </el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
-
-    <!-- 列表 -->
-    <el-card class="table-card card-hover">
-      <div class="table-wrapper">
-        <el-table :data="tableData" stripe class="custom-table" table-layout="auto">
-        <el-table-column prop="companyName" label="公司名称" min-width="120">
-          <template #default="{ row }">
-            <div class="company-cell">
-              <el-icon v-if="row.pinned" class="pin-icon"><Star /></el-icon>
-              <span>{{ row.companyName }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="position" label="岗位" min-width="120" />
-        <el-table-column prop="jobType" label="类型" width="80" />
-        <el-table-column prop="applyDate" label="投递日期" width="110" />
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="{ row }">
-            <el-dropdown trigger="click" @command="(cmd) => handleStatusChange(row, cmd)">
-              <el-tag :color="getStatusColor(row.status)" class="status-tag-clickable">
-                {{ row.status }}
-              </el-tag>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item
-                    v-for="item in statusOptions"
-                    :key="item"
-                    :command="item"
-                  >
-                    <el-tag :color="getStatusColor(item)" size="small" class="status-option-tag">{{ item }}</el-tag>
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </template>
-        </el-table-column>
-        <el-table-column label="投递链接" min-width="120">
-          <template #default="{ row }">
-            <el-button
-              v-if="row.applyLink"
-              size="small"
-              type="primary"
-              link
-              @click="openLink(row.applyLink)"
-            >
-              <el-icon><Link /></el-icon>
-              查看进度
+    <!-- Search Section -->
+    <div class="search-section">
+      <div class="search-inner">
+        <el-form :inline="true" class="search-form">
+          <el-form-item label="公司名称" class="search-item">
+            <el-input
+              v-model="searchForm.companyName"
+              placeholder="搜索公司..."
+              clearable
+              @keyup.enter="handleSearch"
+              class="search-input"
+            />
+          </el-form-item>
+          <el-form-item label="状态" class="search-item">
+            <el-select v-model="searchForm.status" placeholder="全部状态" clearable class="search-select">
+              <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
+            </el-select>
+          </el-form-item>
+          <el-form-item class="search-actions">
+            <el-button type="primary" class="search-btn btn-glow" @click="handleSearch">
+              <el-icon><Search /></el-icon>
+              搜索
             </el-button>
-            <span v-else class="text-muted">未设置</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="remark" label="备注" min-width="150" show-overflow-tooltip />
-        <el-table-column label="操作" width="280" fixed="right">
-          <template #default="{ row }">
-            <div class="action-buttons">
-              <el-button size="small" :type="row.pinned ? 'warning' : 'default'" plain class="btn-click" @click="togglePin(row)">
-                <el-icon><Star /></el-icon>
-                {{ row.pinned ? '取消置顶' : '置顶' }}
+            <el-button class="reset-btn" @click="resetSearch">重置</el-button>
+            <el-button type="primary" class="add-btn btn-glow" @click="openDialog()">
+              <el-icon><Plus /></el-icon>
+              新增投递
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-section">
+      <div class="table-wrapper">
+        <el-table :data="tableData" stripe class="custom-table" table-layout="auto" row-class-name="table-row">
+          <el-table-column prop="companyName" label="公司名称" min-width="140">
+            <template #default="{ row }">
+              <div class="company-cell">
+                <el-icon v-if="row.pinned" class="pin-icon"><Star /></el-icon>
+                <span class="company-name">{{ row.companyName }}</span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="position" label="岗位" min-width="120" />
+          <el-table-column prop="jobType" label="类型" width="80">
+            <template #default="{ row }">
+              <el-tag size="small" :type="row.jobType === '校招' ? 'primary' : 'success'">
+                {{ row.jobType }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="applyDate" label="投递日期" width="110" />
+          <el-table-column prop="status" label="状态" width="100">
+            <template #default="{ row }">
+              <el-dropdown trigger="click" @command="(cmd) => handleStatusChange(row, cmd)">
+                <el-tag :color="getStatusColor(row.status)" class="status-tag">
+                  {{ row.status }}
+                </el-tag>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item v-for="item in statusOptions" :key="item" :command="item">
+                      <el-tag :color="getStatusColor(item)" size="small" class="status-option-tag">{{ item }}</el-tag>
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </template>
+          </el-table-column>
+          <el-table-column label="投递链接" min-width="120">
+            <template #default="{ row }">
+              <el-button
+                v-if="row.applyLink"
+                size="small"
+                type="primary"
+                link
+                class="link-btn"
+                @click="openLink(row.applyLink)"
+              >
+                <el-icon><Link /></el-icon>
+                查看进度
               </el-button>
-              <el-button size="small" type="primary" plain class="btn-click" @click="viewDetail(row)">详情</el-button>
-              <el-button size="small" type="primary" class="btn-click" @click="openDialog(row)">编辑</el-button>
-              <el-button size="small" type="danger" plain class="btn-click" @click="handleDelete(row)">删除</el-button>
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
+              <span v-else class="text-muted">未设置</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="remark" label="备注" min-width="150" show-overflow-tooltip />
+          <el-table-column label="操作" width="280" fixed="right">
+            <template #default="{ row }">
+              <div class="action-buttons">
+                <el-button size="small" :type="row.pinned ? 'warning' : 'default'" plain class="action-btn btn-click" @click="togglePin(row)">
+                  <el-icon><Star /></el-icon>
+                  {{ row.pinned ? '取消置顶' : '置顶' }}
+                </el-button>
+                <el-button size="small" type="primary" plain class="action-btn btn-click" @click="viewDetail(row)">详情</el-button>
+                <el-button size="small" type="primary" class="action-btn btn-click" @click="openDialog(row)">编辑</el-button>
+                <el-button size="small" type="danger" plain class="action-btn btn-click" @click="handleDelete(row)">删除</el-button>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
       </div>
 
+      <!-- Pagination -->
       <div class="pagination-wrapper">
         <el-pagination
           v-model:current-page="pagination.page"
@@ -105,11 +115,11 @@
           @current-change="fetchData"
         />
       </div>
-    </el-card>
+    </div>
 
-    <!-- 新增/编辑对话框 -->
-    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑投递' : '新增投递'" width="550px" class="dialog-card" destroy-on-close>
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
+    <!-- Add/Edit Dialog -->
+    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑投递' : '新增投递'" width="560px" class="dialog-card" destroy-on-close>
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px" class="dialog-form">
         <el-form-item label="公司名称" prop="companyName">
           <el-input v-model="form.companyName" placeholder="请输入公司名称" />
         </el-form-item>
@@ -131,7 +141,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="投递链接">
-          <el-input v-model="form.applyLink" placeholder="请输入投递网站链接（如：https://..." />
+          <el-input v-model="form.applyLink" placeholder="https://..." />
         </el-form-item>
         <el-form-item label="备注">
           <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="请输入备注" />
@@ -139,72 +149,64 @@
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" class="submit-btn" @click="handleSubmit">确定</el-button>
+        <el-button type="primary" class="submit-btn btn-glow" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
 
-    <!-- 详情对话框 -->
-    <el-dialog v-model="detailVisible" title="投递详情" width="900px" class="dialog-card" destroy-on-close>
-      <el-descriptions :column="2" border>
+    <!-- Detail Dialog -->
+    <el-dialog v-model="detailVisible" title="投递详情" width="920px" class="dialog-card" destroy-on-close>
+      <el-descriptions :column="2" border class="detail-descriptions">
         <el-descriptions-item label="公司名称">{{ detailData.companyName }}</el-descriptions-item>
         <el-descriptions-item label="岗位">{{ detailData.position }}</el-descriptions-item>
         <el-descriptions-item label="类型">{{ detailData.jobType }}</el-descriptions-item>
         <el-descriptions-item label="投递日期">{{ detailData.applyDate }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :color="getStatusColor(detailData.status)" class="tag-glow">{{ detailData.status }}</el-tag>
+          <el-tag :color="getStatusColor(detailData.status)">{{ detailData.status }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="投递链接">
-            <el-button
-              v-if="detailData.applyLink"
-              size="small"
-              type="primary"
-              link
-              @click="openLink(detailData.applyLink)"
-            >
-              <el-icon><Link /></el-icon>
-              {{ detailData.applyLink }}
-            </el-button>
-            <span v-else>未设置</span>
-          </el-descriptions-item>
+          <el-button v-if="detailData.applyLink" size="small" type="primary" link @click="openLink(detailData.applyLink)">
+            <el-icon><Link /></el-icon>
+            {{ detailData.applyLink }}
+          </el-button>
+          <span v-else>未设置</span>
+        </el-descriptions-item>
         <el-descriptions-item label="备注" :span="2">{{ detailData.remark || '无' }}</el-descriptions-item>
       </el-descriptions>
 
-      <!-- 笔试记录 -->
+      <!-- Written Tests Section -->
       <el-divider content-position="left">笔试记录</el-divider>
       <div class="record-section">
-        <el-button size="small" type="primary" @click="openWrittenTestDialog" style="margin-bottom: 12px;">
-          添加笔试记录
+        <el-button size="small" type="primary" class="section-add-btn" @click="openWrittenTestDialog">
+          <el-icon><Plus /></el-icon>添加笔试记录
         </el-button>
-        <el-table :data="writtenTests" stripe size="small" v-if="writtenTests.length">
+        <el-table :data="writtenTests" stripe size="small" v-if="writtenTests.length" class="record-table">
           <el-table-column prop="testDate" label="日期" width="110" />
           <el-table-column prop="testType" label="类型" width="80" />
           <el-table-column prop="platform" label="平台" width="100" />
           <el-table-column prop="result" label="结果" width="80">
             <template #default="{ row }">
-              <el-tag :type="getResultType(row.result)" size="small" class="tag-glow">{{ row.result }}</el-tag>
+              <el-tag :type="getResultType(row.result)" size="small">{{ row.result }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="questions" label="题目" show-overflow-tooltip />
           <el-table-column label="操作" width="100">
             <template #default="{ row }">
-              <div class="action-buttons">
-                <el-button size="small" link type="primary" @click="editWrittenTest(row)">编辑</el-button>
-                <el-button size="small" link type="danger" @click="deleteWrittenTest(row)">删除</el-button>
-              </div>
+              <el-button size="small" link type="primary" @click="editWrittenTest(row)">编辑</el-button>
+              <el-button size="small" link type="danger" @click="deleteWrittenTest(row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
-        <el-empty v-else description="暂无笔试记录" :image-size="60" />
+        <el-empty v-else description="暂无笔试记录" :image-size="80" />
       </div>
 
-      <!-- 面试记录 -->
+      <!-- Interviews Section -->
       <el-divider content-position="left">面试记录</el-divider>
       <div class="record-section">
-        <el-button size="small" type="primary" @click="openInterviewDialog" style="margin-bottom: 12px;">
-          添加面试记录
+        <el-button size="small" type="primary" class="section-add-btn" @click="openInterviewDialog">
+          <el-icon><Plus /></el-icon>添加面试记录
         </el-button>
-        <el-table :data="interviews" stripe size="small" v-if="interviews.length">
-          <el-table-column prop="round" label="轮次" width="80">
+        <el-table :data="interviews" stripe size="small" v-if="interviews.length" class="record-table">
+          <el-table-column label="轮次" width="80">
             <template #default="{ row }">第{{ row.round }}轮</template>
           </el-table-column>
           <el-table-column prop="interviewDate" label="日期" width="110" />
@@ -212,25 +214,23 @@
           <el-table-column prop="interviewer" label="面试官" width="100" />
           <el-table-column prop="result" label="结果" width="80">
             <template #default="{ row }">
-              <el-tag :type="getResultType(row.result)" size="small" class="tag-glow">{{ row.result }}</el-tag>
+              <el-tag :type="getResultType(row.result)" size="small">{{ row.result }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="questions" label="问题" show-overflow-tooltip />
           <el-table-column label="操作" width="100">
             <template #default="{ row }">
-              <div class="action-buttons">
-                <el-button size="small" link type="primary" @click="editInterview(row)">编辑</el-button>
-                <el-button size="small" link type="danger" @click="deleteInterview(row)">删除</el-button>
-              </div>
+              <el-button size="small" link type="primary" @click="editInterview(row)">编辑</el-button>
+              <el-button size="small" link type="danger" @click="deleteInterview(row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
-        <el-empty v-else description="暂无面试记录" :image-size="60" />
+        <el-empty v-else description="暂无面试记录" :image-size="80" />
       </div>
     </el-dialog>
 
-    <!-- 笔试记录对话框 -->
-    <el-dialog v-model="writtenTestDialogVisible" :title="editingWrittenTestId ? '编辑笔试' : '新增笔试'" width="550px" class="dialog-card" destroy-on-close>
+    <!-- Written Test Dialog -->
+    <el-dialog v-model="writtenTestDialogVisible" :title="editingWrittenTestId ? '编辑笔试' : '新增笔试'" width="560px" class="dialog-card" destroy-on-close>
       <el-form ref="writtenTestFormRef" :model="writtenTestForm" label-width="100px">
         <el-form-item label="笔试日期">
           <el-date-picker v-model="writtenTestForm.testDate" type="date" placeholder="选择日期" value-format="YYYY-MM-DD" style="width: 100%" />
@@ -242,7 +242,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="平台">
-          <el-input v-model="writtenTestForm.platform" placeholder="如：牛客、赛码等" />
+          <el-input v-model="writtenTestForm.platform" placeholder="牛客、赛码等" />
         </el-form-item>
         <el-form-item label="结果">
           <el-select v-model="writtenTestForm.result" placeholder="请选择结果">
@@ -252,20 +252,20 @@
           </el-select>
         </el-form-item>
         <el-form-item label="题目记录">
-          <el-input v-model="writtenTestForm.questions" type="textarea" :rows="4" placeholder="请记录笔试题目" />
+          <el-input v-model="writtenTestForm.questions" type="textarea" :rows="4" placeholder="记录笔试题目" />
         </el-form-item>
         <el-form-item label="备注">
-          <el-input v-model="writtenTestForm.notes" type="textarea" :rows="2" placeholder="请输入备注" />
+          <el-input v-model="writtenTestForm.notes" type="textarea" :rows="2" placeholder="备注信息" />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="writtenTestDialogVisible = false">取消</el-button>
-        <el-button type="primary" class="submit-btn" @click="submitWrittenTest">确定</el-button>
+        <el-button type="primary" class="submit-btn btn-glow" @click="submitWrittenTest">确定</el-button>
       </template>
     </el-dialog>
 
-    <!-- 面试记录对话框 -->
-    <el-dialog v-model="interviewDialogVisible" :title="editingInterviewId ? '编辑面试' : '新增面试'" width="550px" class="dialog-card" destroy-on-close>
+    <!-- Interview Dialog -->
+    <el-dialog v-model="interviewDialogVisible" :title="editingInterviewId ? '编辑面试' : '新增面试'" width="560px" class="dialog-card" destroy-on-close>
       <el-form ref="interviewFormRef" :model="interviewForm" label-width="100px">
         <el-form-item label="面试轮次">
           <el-input-number v-model="interviewForm.round" :min="1" :max="10" />
@@ -281,7 +281,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="面试官">
-          <el-input v-model="interviewForm.interviewer" placeholder="请输入面试官信息" />
+          <el-input v-model="interviewForm.interviewer" placeholder="面试官信息" />
         </el-form-item>
         <el-form-item label="结果">
           <el-select v-model="interviewForm.result" placeholder="请选择结果">
@@ -291,18 +291,18 @@
           </el-select>
         </el-form-item>
         <el-form-item label="问题记录">
-          <el-input v-model="interviewForm.questions" type="textarea" :rows="4" placeholder="请记录面试问题" />
+          <el-input v-model="interviewForm.questions" type="textarea" :rows="4" placeholder="记录面试问题" />
         </el-form-item>
         <el-form-item label="自我评价">
-          <el-input v-model="interviewForm.performance" type="textarea" :rows="2" placeholder="请输入表现评价" />
+          <el-input v-model="interviewForm.performance" type="textarea" :rows="2" placeholder="表现评价" />
         </el-form-item>
         <el-form-item label="备注">
-          <el-input v-model="interviewForm.notes" type="textarea" :rows="2" placeholder="请输入备注" />
+          <el-input v-model="interviewForm.notes" type="textarea" :rows="2" placeholder="备注信息" />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="interviewDialogVisible = false">取消</el-button>
-        <el-button type="primary" class="submit-btn" @click="submitInterview">确定</el-button>
+        <el-button type="primary" class="submit-btn btn-glow" @click="submitInterview">确定</el-button>
       </template>
     </el-dialog>
   </div>
@@ -311,7 +311,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Star } from '@element-plus/icons-vue'
+import { Star, Search, Plus, Link } from '@element-plus/icons-vue'
 import { applicationApi, writtenTestApi, interviewApi } from '../api'
 
 const statusOptions = ['待处理', '测评中', '笔试中', '面试中', '已offer', '已淘汰']
@@ -346,13 +346,13 @@ const rules = {
   position: [{ required: true, message: '请输入岗位名称', trigger: 'blur' }]
 }
 
-// 详情相关
+// Detail related
 const detailVisible = ref(false)
 const detailData = ref({})
 const writtenTests = ref([])
 const interviews = ref([])
 
-// 笔试记录相关
+// Written test related
 const writtenTestDialogVisible = ref(false)
 const editingWrittenTestId = ref(null)
 const writtenTestFormRef = ref(null)
@@ -366,7 +366,7 @@ const writtenTestForm = reactive({
   notes: ''
 })
 
-// 面试记录相关
+// Interview related
 const interviewDialogVisible = ref(false)
 const editingInterviewId = ref(null)
 const interviewFormRef = ref(null)
@@ -382,31 +382,16 @@ const interviewForm = reactive({
   notes: ''
 })
 
-const getStatusType = (status) => {
-  const map = {
-    '待处理': 'info',
-    '流程中': 'primary',
-    '测评中': 'warning',
-    '笔试中': 'warning',
-    '面试中': 'warning',
-    '已offer': 'success',
-    '已拒绝': 'danger',
-    '已淘汰': 'danger'
-  }
-  return map[status] || 'info'
-}
-
-// 获取状态颜色，与数据看板保持一致
 const getStatusColor = (status) => {
   const map = {
-    '待处理': '#3b82f6',
+    '待处理': '#0ea5e9',
     '测评中': '#f59e0b',
     '笔试中': '#8b5cf6',
-    '面试中': '#06b6d4',
-    '已offer': '#22c55e',
-    '已淘汰': '#6b7280'
+    '面试中': '#14b8a6',
+    '已offer': '#10b981',
+    '已淘汰': '#64748b'
   }
-  return map[status] || '#9ca3af'
+  return map[status] || '#94a3b8'
 }
 
 const getResultType = (result) => {
@@ -418,14 +403,10 @@ const getResultType = (result) => {
   return map[result] || 'info'
 }
 
-// 打开投递链接
 const openLink = (url) => {
-  if (url) {
-    window.open(url, '_blank')
-  }
+  if (url) window.open(url, '_blank')
 }
 
-// 快速修改状态
 const handleStatusChange = async (row, newStatus) => {
   try {
     await applicationApi.update(row.id, { status: newStatus })
@@ -434,7 +415,7 @@ const handleStatusChange = async (row, newStatus) => {
   } catch (error) {
     console.error('更新状态失败:', error)
     ElMessage.error('更新失败')
-    fetchData() // 恢复原状态
+    fetchData()
   }
 }
 
@@ -496,7 +477,6 @@ const handleSubmit = async () => {
   await formRef.value.validate()
   try {
     const submitData = { ...form }
-    // 新增时，如果未选择投递日期，默认为当前日期
     if (!editingId.value && !submitData.applyDate) {
       submitData.applyDate = new Date().toISOString().split('T')[0]
     }
@@ -527,7 +507,6 @@ const handleDelete = async (row) => {
   }
 }
 
-// 置顶/取消置顶
 const togglePin = async (row) => {
   try {
     await applicationApi.update(row.id, { pinned: !row.pinned })
@@ -539,7 +518,6 @@ const togglePin = async (row) => {
   }
 }
 
-// 详情相关
 const viewDetail = async (row) => {
   detailData.value = row
   detailVisible.value = true
@@ -565,7 +543,6 @@ const fetchInterviews = async (applicationId) => {
   }
 }
 
-// 笔试记录相关
 const openWrittenTestDialog = () => {
   editingWrittenTestId.value = null
   Object.assign(writtenTestForm, {
@@ -621,7 +598,6 @@ const deleteWrittenTest = async (row) => {
   }
 }
 
-// 面试记录相关
 const openInterviewDialog = () => {
   editingInterviewId.value = null
   Object.assign(interviewForm, {
@@ -688,220 +664,275 @@ onMounted(() => {
 
 <style scoped>
 .application-list {
-  padding: 0;
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1600px;
 }
 
+/* === Search Section === */
+.search-section {
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 20px 24px;
+}
+
+.search-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.search-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.search-item {
+  margin-bottom: 0 !important;
+}
+
+.search-item :deep(.el-form-item__label) {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.search-input,
+.search-select {
+  min-width: 180px;
+}
+
+.search-actions {
+  margin-bottom: 0 !important;
+}
+
+.search-btn,
 .add-btn {
   background: var(--primary-gradient);
   border: none;
   border-radius: var(--radius-sm);
+  font-weight: 600;
 }
 
+.search-btn:hover,
 .add-btn:hover {
   opacity: 0.9;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.search-card {
-  border: none !important;
-  border-radius: var(--radius-lg) !important;
-  background: var(--bg-card) !important;
-  backdrop-filter: var(--glass-blur);
-  position: relative;
-  z-index: 10;
-  margin-bottom: 16px;
-}
-
-.search-btn {
-  background: var(--primary-gradient);
-  border: none;
+  transform: translateY(-1px);
+  box-shadow: var(--glow-primary);
 }
 
 .reset-btn {
-  border-color: var(--border-color);
+  border: 1px solid var(--border-color);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
 }
 
-.table-card {
-  border: none !important;
-  border-radius: var(--radius-lg) !important;
-  background: var(--bg-card) !important;
+.reset-btn:hover {
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+/* === Table Section === */
+.table-section {
+  background: var(--bg-card);
   backdrop-filter: var(--glass-blur);
-  position: relative;
-  z-index: 1;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 24px;
 }
 
-.pagination-wrapper {
-  margin-top: 20px;
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.custom-table {
+  font-size: 14px;
+}
+
+.custom-table :deep(.el-table__cell) {
+  padding: 16px 12px;
+}
+
+.custom-table :deep(.el-table__row) {
+  transition: background-color 200ms ease;
+}
+
+.custom-table :deep(.el-table__row:hover > td) {
+  background-color: var(--bg-glass) !important;
+}
+
+.company-cell {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
 }
 
-.record-section {
-  min-height: 120px;
+.pin-icon {
+  color: #fbbf24;
+  font-size: 16px;
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+.company-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.status-tag {
+  color: white !important;
+  border: none !important;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.status-tag:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.status-option-tag {
+  color: white !important;
+  border: none !important;
+}
+
+.link-btn {
+  font-weight: 500;
+}
+
+.text-muted {
+  color: var(--text-muted);
+  font-size: 13px;
 }
 
 .action-buttons {
   display: flex;
   gap: 6px;
-  align-items: center;
   flex-wrap: nowrap;
 }
 
-/* 对话框样式 */
-.dialog-card .el-dialog {
-  border-radius: var(--radius-lg);
+.action-btn {
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+}
+
+.pagination-wrapper {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* === Dialog Styles === */
+.dialog-card :deep(.el-dialog) {
+  border-radius: var(--radius-xl);
   overflow: hidden;
 }
 
 .dialog-card :deep(.el-dialog__header) {
   background: var(--primary-gradient);
-  padding: 16px 20px;
+  padding: 20px 24px;
   margin: 0;
 }
 
 .dialog-card :deep(.el-dialog__title) {
   color: white;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 18px;
 }
 
 .dialog-card :deep(.el-dialog__headerbtn .el-dialog__close) {
-  color: white;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 18px;
 }
 
 .dialog-card :deep(.el-dialog__body) {
-  padding: 24px;
+  padding: 28px 24px;
   background: var(--bg-card);
 }
 
 .dialog-card :deep(.el-dialog__footer) {
   background: var(--bg-card);
   border-top: 1px solid var(--border-color);
-  padding: 16px 20px;
+  padding: 20px 24px;
+}
+
+.dialog-form :deep(.el-form-item__label) {
+  font-weight: 500;
 }
 
 .submit-btn {
   background: var(--primary-gradient);
   border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
 }
 
 .submit-btn:hover {
   opacity: 0.9;
+  box-shadow: var(--glow-primary);
 }
 
-/* 修复：禁用表格行的全局主题过渡，避免对话框关闭时的刷新感 */
-:deep(.el-table__row),
-:deep(.el-table__row *),
-:deep(.el-table__header-row),
-:deep(.el-table__header-row *) {
-  transition: none !important;
+/* === Detail Dialog === */
+.detail-descriptions :deep(.el-descriptions__label) {
+  font-weight: 500;
+  background: var(--bg-secondary);
 }
 
-/* 投递链接样式 */
-.text-muted {
-  color: var(--text-muted);
-  font-size: 13px;
+.record-section {
+  min-height: 120px;
+  margin-top: 12px;
 }
 
-/* 自定义状态 tag 颜色 */
-.status-tag-clickable,
-.tag-glow {
-  color: #fff !important;
-  border: none !important;
+.section-add-btn {
+  background: var(--primary-gradient);
+  border: none;
+  margin-bottom: 16px;
 }
 
-/* 下拉菜单中的 tag 样式 */
-:deep(.el-dropdown-menu .el-tag) {
-  color: #fff !important;
-  border: none !important;
+.record-table {
+  border-radius: var(--radius-md);
 }
 
-/* 下拉选项文字颜色修复 */
-:deep(.el-dropdown-menu__item) {
-  color: var(--text-primary);
-}
-
-:deep(.el-dropdown-menu__item .el-tag) {
-  color: #fff !important;
-}
-
-/* 状态 tag 可点击样式 */
-.status-tag-clickable {
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.status-tag-clickable:hover {
-  transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* 下拉选项 tag 样式 */
-.status-option-tag {
-  color: #fff !important;
-  border: none !important;
-}
-
-/* 表格字体和行间距 */
-:deep(.el-table) {
-  font-size: 15px;
-}
-
-:deep(.el-table .el-table__cell) {
-  padding: 14px 0;
-  font-size: 15px;
-}
-
-:deep(.el-table .cell) {
-  line-height: 1.8;
-}
-
-/* 置顶图标样式 */
-.company-cell {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.pin-icon {
-  color: #f59e0b;
-  font-size: 16px;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
-}
-
-/* 表格横向滚动容器 */
-.table-wrapper {
-  overflow-x: auto;
-  position: relative;
-}
-
-/* 美化滚动条 */
+/* === Scrollbar === */
 .table-wrapper::-webkit-scrollbar {
   height: 8px;
 }
 
 .table-wrapper::-webkit-scrollbar-track {
   background: var(--bg-secondary);
-  border-radius: 4px;
+  border-radius: var(--radius-full);
 }
 
 .table-wrapper::-webkit-scrollbar-thumb {
   background: var(--primary-color);
-  border-radius: 4px;
+  border-radius: var(--radius-full);
 }
 
 .table-wrapper::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-color);
-  opacity: 0.8;
+  background: var(--primary-light);
+}
+
+/* === Animations === */
+@keyframes iconPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* Disable table row transitions for dialog closing UX */
+:deep(.el-table__row),
+:deep(.el-table__row *) {
+  transition: background-color 200ms ease !important;
 }
 </style>

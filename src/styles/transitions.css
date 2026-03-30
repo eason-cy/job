@@ -1,7 +1,14 @@
-/* 页面淡入淡出 */
+/* ============================================
+   Neo-Tech Editorial Animation System
+   Sophisticated motion design for modern UX
+   ============================================ */
+
+/* === Page Transitions === */
+
+/* Smooth Fade */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .fade-enter-from,
@@ -9,24 +16,362 @@
   opacity: 0;
 }
 
-/* 滑动淡入 - 从左 */
-.slide-left-enter-active,
+/* Slide with Depth */
+.slide-left-enter-active {
+  transition: all 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .slide-left-leave-active {
-  transition: all 0.3s ease;
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .slide-left-enter-from {
   opacity: 0;
-  transform: translateX(-20px);
+  transform: translateX(24px);
 }
 
 .slide-left-leave-to {
   opacity: 0;
-  transform: translateX(20px);
+  transform: translateX(-24px);
 }
 
-/* 列表项交错入场动画 */
+/* === Staggered List Animations === */
+
 @keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.list-enter-active {
+  animation: fadeInUp 400ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.list-leave-active {
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(-16px);
+}
+
+/* === Card Interactions === */
+
+.card-hover {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, box-shadow;
+}
+
+.card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Elevated card variant */
+.card-elevated {
+  transition: all 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.card-elevated:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: var(--shadow-2xl);
+}
+
+/* === Button Feedback === */
+
+.btn-click {
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.btn-click:active {
+  transform: scale(0.97);
+}
+
+.btn-click:hover {
+  transform: translateY(-2px);
+}
+
+/* Primary Button Glow */
+.btn-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-glow::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 500ms ease-out;
+}
+
+.btn-glow:hover::before {
+  transform: translate(-50%, -50%) scale(2);
+}
+
+/* === Number Animations === */
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.number-animate {
+  animation: countUp 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Counter with stagger */
+.counter-stagger {
+  animation: countUp 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: calc(var(--stagger-index, 0) * 80ms);
+}
+
+/* === Icon Animations === */
+
+@keyframes iconSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.8;
+  }
+}
+
+.icon-hover:hover .el-icon {
+  animation: iconSpin 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.icon-pulse {
+  animation: iconPulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* === Attention Seekers === */
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 var(--border-focus);
+  }
+  50% {
+    box-shadow: 0 0 0 8px transparent;
+  }
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.95;
+  }
+}
+
+.pulse-animation {
+  animation: pulseGlow 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.breathe-animation {
+  animation: breathe 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* === Glow Effects === */
+
+@keyframes borderGlow {
+  0%, 100% {
+    box-shadow: 0 0 4px var(--primary-color);
+  }
+  50% {
+    box-shadow: 0 0 12px var(--primary-color), 0 0 24px var(--primary-light);
+  }
+}
+
+.glow-effect {
+  animation: borderGlow 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* === Dialog Animations === */
+
+.custom-dialog-enter-active {
+  animation: dialogSlideIn 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.custom-dialog-leave-active {
+  animation: dialogSlideOut 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dialogSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-24px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dialogSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.98);
+  }
+}
+
+/* === Menu Animations === */
+
+.menu-item-hover {
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.menu-item-hover::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 0;
+  background: var(--primary-gradient);
+  border-radius: 0 2px 2px 0;
+  transform: translateY(-50%);
+  transition: height 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.menu-item-hover:hover::before {
+  height: 24px;
+}
+
+.menu-item-hover:hover {
+  padding-left: 24px !important;
+  background: var(--bg-glass);
+}
+
+/* === Tag Animations === */
+
+.tag-glow {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tag-glow:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* === Input Focus Animations === */
+
+.input-focus .el-input__wrapper {
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-focus .el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--border-strong) inset;
+}
+
+.input-focus .el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 2px var(--border-focus) inset, var(--glow-primary);
+}
+
+/* === Table Row Interactions === */
+
+.table-row-hover {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.table-row-hover:hover {
+  background: var(--bg-glass) !important;
+}
+
+/* === Skeleton Loading === */
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-secondary) 25%,
+    var(--bg-glass-strong) 50%,
+    var(--bg-secondary) 75%
+  );
+  background-size: 200px 100%;
+  animation: shimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* === Reveal Animations === */
+
+@keyframes revealFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes revealFromBottom {
   from {
     opacity: 0;
     transform: translateY(20px);
@@ -37,182 +382,104 @@
   }
 }
 
-.list-enter-active {
-  animation: fadeInUp 0.4s ease forwards;
-}
-
-.list-leave-active {
-  transition: all 0.3s ease;
-}
-
-.list-leave-to {
-  opacity: 0;
-  transform: translateX(-20px);
-}
-
-/* 卡片悬浮效果 */
-.card-hover {
-  transition: all 0.3s ease;
-}
-
-.card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-}
-
-/* 按钮点击反馈 */
-.btn-click:active {
-  transform: scale(0.96);
-}
-
-/* 数字计数动画 */
-@keyframes countUp {
+@keyframes revealScale {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: scale(0.9);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.number-animate {
-  animation: countUp 0.6s ease forwards;
-}
-
-/* 图标旋转动画 */
-@keyframes iconRotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.icon-hover:hover .el-icon {
-  animation: iconRotate 0.6s ease;
-}
-
-/* 脉冲动画 - 用于提示关注 */
-@keyframes pulse {
-  0%, 100% {
     transform: scale(1);
   }
-  50% {
-    transform: scale(1.05);
-  }
 }
 
-.pulse-animation {
-  animation: pulse 2s ease-in-out infinite;
+.reveal-left {
+  animation: revealFromLeft 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-/* 边框发光效果 */
-@keyframes glow {
+.reveal-bottom {
+  animation: revealFromBottom 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.reveal-scale {
+  animation: revealScale 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* === Stat Card Entrance === */
+
+.stat-card-enter {
+  animation: fadeInUp 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: calc(var(--card-index, 0) * 100ms);
+  opacity: 0;
+}
+
+/* === Floating Animation === */
+
+@keyframes float {
   0%, 100% {
-    box-shadow: 0 0 5px var(--primary-color);
+    transform: translateY(0);
   }
   50% {
-    box-shadow: 0 0 20px var(--primary-color), 0 0 30px var(--primary-light);
+    transform: translateY(-6px);
   }
 }
 
-.glow-effect {
-  animation: glow 2s ease-in-out infinite;
+.float-animation {
+  animation: float 4s ease-in-out infinite;
 }
 
-/* 对话框入场动画 - 重命名避免与 Element Plus 冲突 */
-.custom-dialog-enter-active {
-  animation: dialogIn 0.3s ease;
+/* === Theme Transition (Disabled for UX) === */
+
+/*
+.theme-transition * {
+  transition: background-color 400ms ease,
+              color 300ms ease,
+              border-color 300ms ease,
+              box-shadow 300ms ease !important;
+}
+*/
+
+/* === Scroll Reveal (JS triggered) === */
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: all 600ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.custom-dialog-leave-active {
-  animation: dialogOut 0.2s ease;
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-@keyframes dialogIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9) translateY(-20px);
-  }
+/* === Micro-interactions === */
+
+/* Ripple Effect */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+}
+
+.ripple:active::after {
+  animation: rippleEffect 600ms ease-out forwards;
+}
+
+@keyframes rippleEffect {
   to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes dialogOut {
-  from {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-  to {
+    transform: translate(-50%, -50%) scale(40);
     opacity: 0;
-    transform: scale(0.9) translateY(-20px);
   }
 }
-
-/* 菜单项悬浮动画 */
-.menu-item-hover {
-  transition: all 0.25s ease;
-}
-
-.menu-item-hover:hover {
-  padding-left: 24px !important;
-  background: var(--bg-glass);
-}
-
-/* 标签发光效果 */
-.tag-glow {
-  transition: all 0.3s ease;
-}
-
-.tag-glow:hover {
-  box-shadow: 0 0 10px currentColor;
-  transform: scale(1.05);
-}
-
-/* 输入框聚焦动画 */
-.input-focus .el-input__wrapper {
-  transition: all 0.3s ease;
-}
-
-.input-focus .el-input__wrapper:hover {
-  box-shadow: 0 0 0 1px var(--primary-light) inset;
-}
-
-.input-focus .el-input__wrapper.is-focus {
-  box-shadow: 0 0 0 2px var(--primary-color) inset;
-}
-
-/* 表格行悬浮动画 */
-.table-row-hover {
-  transition: all 0.2s ease;
-}
-
-.table-row-hover:hover {
-  background: var(--bg-glass) !important;
-}
-
-/* 骨架屏动画 */
-@keyframes skeleton {
-  0% {
-    background-position: -200px 0;
-  }
-  100% {
-    background-position: calc(200px + 100%) 0;
-  }
-}
-
-.skeleton {
-  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-glass) 50%, var(--bg-secondary) 75%);
-  background-size: 200px 100%;
-  animation: skeleton 1.5s ease-in-out infinite;
-}
-
-/* 主题切换过渡 - 暂时禁用，因为会影响对话框关闭动画 */
-/* .theme-transition * {
-  transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease !important;
-} */
