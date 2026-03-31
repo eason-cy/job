@@ -95,12 +95,12 @@ let pieChart = null
 
 const statusStats = computed(() => {
   const configs = [
-    { status: '待处理', label: '待处理', icon: Clock, gradient: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)' },
-    { status: '测评中', label: '测评中', icon: EditPen, gradient: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)' },
-    { status: '笔试中', label: '笔试中', icon: Edit, gradient: 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)' },
-    { status: '面试中', label: '面试中', icon: ChatDotRound, gradient: 'linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%)' },
-    { status: '已offer', label: '已获Offer', icon: Trophy, gradient: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)' },
-    { status: '已淘汰', label: '已淘汰', icon: CircleClose, gradient: 'linear-gradient(135deg, #64748b 0%, #94a3b8 100%)' }
+    { status: '待处理', label: '待处理', icon: Clock, gradient: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)' },
+    { status: '测评中', label: '测评中', icon: EditPen, gradient: 'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)' },
+    { status: '笔试中', label: '笔试中', icon: Edit, gradient: 'linear-gradient(135deg, #6366f1 0%, #818cf8 100%)' },
+    { status: '面试中', label: '面试中', icon: ChatDotRound, gradient: 'linear-gradient(135deg, #0891b2 0%, #06b6d4 100%)' },
+    { status: '已offer', label: '已获Offer', icon: Trophy, gradient: 'linear-gradient(135deg, #059669 0%, #10b981 100%)' },
+    { status: '已淘汰', label: '已淘汰', icon: CircleClose, gradient: 'linear-gradient(135deg, #475569 0%, #64748b 100%)' }
   ]
 
   const total = statistics.value.total || 1
@@ -125,19 +125,19 @@ const getChartColors = () => {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
   if (isDark) {
     return {
-      '待处理': '#0ea5e9',
-      '测评中': '#fbbf24',
-      '笔试中': '#a78bfa',
-      '面试中': '#2dd4bf',
+      '待处理': '#60a5fa',
+      '测评中': '#38bdf8',
+      '笔试中': '#818cf8',
+      '面试中': '#22d3ee',
       '已offer': '#34d399',
       '已淘汰': '#94a3b8'
     }
   }
   return {
-    '待处理': '#0ea5e9',
-    '测评中': '#f59e0b',
-    '笔试中': '#8b5cf6',
-    '面试中': '#14b8a6',
+    '待处理': '#3b82f6',
+    '测评中': '#0ea5e9',
+    '笔试中': '#6366f1',
+    '面试中': '#06b6d4',
     '已offer': '#10b981',
     '已淘汰': '#64748b'
   }

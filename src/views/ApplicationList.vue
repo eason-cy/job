@@ -384,10 +384,10 @@ const interviewForm = reactive({
 
 const getStatusColor = (status) => {
   const map = {
-    '待处理': '#0ea5e9',
-    '测评中': '#f59e0b',
-    '笔试中': '#8b5cf6',
-    '面试中': '#14b8a6',
+    '待处理': '#3b82f6',
+    '测评中': '#0ea5e9',
+    '笔试中': '#6366f1',
+    '面试中': '#06b6d4',
     '已offer': '#10b981',
     '已淘汰': '#64748b'
   }

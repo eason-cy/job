@@ -221,7 +221,7 @@ html, body, #app {
 .orb-2 {
   width: 300px;
   height: 300px;
-  background: linear-gradient(135deg, var(--accent-indigo) 0%, var(--accent-violet) 100%);
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
   bottom: 20%;
   left: 30%;
   animation-delay: -4s;
@@ -438,8 +438,8 @@ html, body, #app {
 }
 
 .theme-toggle-track.is-dark {
-  background: linear-gradient(135deg, var(--accent-indigo) 0%, var(--accent-violet) 100%);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
 .theme-toggle-thumb {
@@ -467,7 +467,7 @@ html, body, #app {
 }
 
 .theme-toggle-track.is-dark .theme-icon {
-  color: var(--accent-indigo);
+  color: #3b82f6;
 }
 
 .theme-label {

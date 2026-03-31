@@ -250,12 +250,12 @@ const statistics = ref({
 })
 
 const statsData = computed(() => [
-  { label: '题目总数', value: statistics.value.total, icon: Collection, gradient: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)' },
+  { label: '题目总数', value: statistics.value.total, icon: Collection, gradient: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)' },
   { label: '需要复习', value: statistics.value.needReview, icon: Clock, gradient: 'linear-gradient(135deg, #f43f5e 0%, #fb7185 100%)' },
   { label: '简单', value: statistics.value.byDifficulty.Easy || 0, icon: CircleCheck, gradient: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)' },
-  { label: '中等', value: statistics.value.byDifficulty.Medium || 0, icon: Star, gradient: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)' },
-  { label: '困难', value: statistics.value.byDifficulty.Hard || 0, icon: Star, gradient: 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)' },
-  { label: '已掌握', value: statistics.value.byFamiliarity[3] || 0, icon: CircleCheck, gradient: 'linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%)' }
+  { label: '中等', value: statistics.value.byDifficulty.Medium || 0, icon: Star, gradient: 'linear-gradient(135deg, #6366f1 0%, #818cf8 100%)' },
+  { label: '困难', value: statistics.value.byDifficulty.Hard || 0, icon: Star, gradient: 'linear-gradient(135deg, #dc2626 0%, #f87171 100%)' },
+  { label: '已掌握', value: statistics.value.byFamiliarity[3] || 0, icon: CircleCheck, gradient: 'linear-gradient(135deg, #0891b2 0%, #06b6d4 100%)' }
 ])
 
 const dialogVisible = ref(false)
