@@ -1,38 +1,56 @@
 /* ============================================
-   Neo-Tech Editorial Animation System
-   Sophisticated motion design for modern UX
+   Pure & Playful - 动效系统
+   灵动活泼的微交互设计
    ============================================ */
+
+/* === Easing Functions === */
+:root {
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring-subtle: cubic-bezier(0.25, 1.2, 0.5, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
 
 /* === Page Transitions === */
 
-/* Smooth Fade */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+/* Smooth Fade with Scale */
+.fade-scale-enter-active {
+  transition: all 350ms var(--ease-spring);
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.fade-scale-leave-active {
+  transition: all 200ms var(--ease-out);
+}
+
+.fade-scale-enter-from {
   opacity: 0;
+  transform: scale(0.96) translateY(8px);
 }
 
-/* Slide with Depth */
+.fade-scale-leave-to {
+  opacity: 0;
+  transform: scale(0.98);
+}
+
+/* Slide with Spring */
 .slide-left-enter-active {
-  transition: all 350ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 400ms var(--ease-spring);
 }
 
 .slide-left-leave-active {
-  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 200ms var(--ease-out);
 }
 
 .slide-left-enter-from {
   opacity: 0;
-  transform: translateX(24px);
+  transform: translateX(20px);
 }
 
 .slide-left-leave-to {
   opacity: 0;
-  transform: translateX(-24px);
+  transform: translateX(-16px);
 }
 
 /* === Staggered List Animations === */
@@ -40,7 +58,7 @@
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -51,7 +69,7 @@
 @keyframes fadeInScale {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.94);
   }
   to {
     opacity: 1;
@@ -62,7 +80,7 @@
 @keyframes slideInRight {
   from {
     opacity: 0;
-    transform: translateX(-12px);
+    transform: translateX(-10px);
   }
   to {
     opacity: 1;
@@ -70,54 +88,84 @@
   }
 }
 
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  70% {
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .list-enter-active {
-  animation: fadeInUp 400ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fadeInUp 400ms var(--ease-spring) forwards;
 }
 
 .list-leave-active {
-  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 200ms var(--ease-out);
 }
 
 .list-leave-to {
   opacity: 0;
-  transform: translateX(-16px);
+  transform: translateX(-12px) scale(0.96);
 }
 
 /* === Card Interactions === */
 
 .card-hover {
-  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 300ms var(--ease-smooth);
   will-change: transform, box-shadow;
 }
 
 .card-hover:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
 }
 
-/* Elevated card variant */
+/* Elevated card variant with spring */
 .card-elevated {
-  transition: all 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 350ms var(--ease-spring);
 }
 
 .card-elevated:hover {
-  transform: translateY(-8px) scale(1.01);
-  box-shadow: var(--shadow-2xl);
+  transform: translateY(-6px) scale(1.008);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Interactive card */
+.card-interactive {
+  transition: all 250ms var(--ease-smooth);
+  cursor: pointer;
+}
+
+.card-interactive:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.card-interactive:active {
+  transform: translateY(-1px) scale(0.99);
 }
 
 /* === Button Feedback === */
 
 .btn-click {
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 150ms var(--ease-smooth);
   will-change: transform;
-}
-
-.btn-click:active {
-  transform: scale(0.97);
 }
 
 .btn-click:hover {
   transform: translateY(-2px);
+}
+
+.btn-click:active {
+  transform: scale(0.97) translateY(0);
+  transition-duration: 80ms;
 }
 
 /* Primary Button Glow */
@@ -133,13 +181,15 @@
   left: 50%;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, transparent 70%);
   transform: translate(-50%, -50%) scale(0);
-  transition: transform 500ms ease-out;
+  opacity: 0;
+  transition: transform 400ms var(--ease-smooth), opacity 300ms;
 }
 
 .btn-glow:hover::before {
-  transform: translate(-50%, -50%) scale(2);
+  transform: translate(-50%, -50%) scale(2.5);
+  opacity: 1;
 }
 
 /* === Number Animations === */
@@ -155,14 +205,33 @@
   }
 }
 
+@keyframes numberPop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 .number-animate {
-  animation: countUp 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: countUp 500ms var(--ease-spring) forwards;
+}
+
+.number-pop {
+  animation: numberPop 400ms var(--ease-spring) forwards;
 }
 
 /* Counter with stagger */
 .counter-stagger {
-  animation: countUp 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  animation-delay: calc(var(--stagger-index, 0) * 80ms);
+  animation: countUp 450ms var(--ease-spring) forwards;
+  animation-delay: calc(var(--stagger-index, 0) * 60ms);
+  opacity: 0;
 }
 
 /* === Icon Animations === */
@@ -182,17 +251,30 @@
     opacity: 1;
   }
   50% {
-    transform: scale(1.15);
-    opacity: 0.8;
+    transform: scale(1.12);
+    opacity: 0.85;
+  }
+}
+
+@keyframes iconBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
   }
 }
 
 .icon-hover:hover .el-icon {
-  animation: iconSpin 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  animation: iconBounce 400ms var(--ease-spring);
 }
 
 .icon-pulse {
-  animation: iconPulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: iconPulse 2.5s var(--ease-smooth) infinite;
+}
+
+.icon-spin {
+  animation: iconSpin 1.2s linear infinite;
 }
 
 /* === Attention Seekers === */
@@ -212,48 +294,57 @@
     opacity: 1;
   }
   50% {
-    transform: scale(1.02);
+    transform: scale(1.015);
     opacity: 0.95;
   }
 }
 
+@keyframes subtlePulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
 .pulse-animation {
-  animation: pulseGlow 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: pulseGlow 2.5s var(--ease-smooth) infinite;
 }
 
 .breathe-animation {
-  animation: breathe 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: breathe 3.5s var(--ease-smooth) infinite;
 }
 
 /* === Glow Effects === */
 
 @keyframes borderGlow {
   0%, 100% {
-    box-shadow: 0 0 4px var(--primary-color);
+    box-shadow: 0 0 3px var(--primary-color);
   }
   50% {
-    box-shadow: 0 0 12px var(--primary-color), 0 0 24px var(--primary-light);
+    box-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-light);
   }
 }
 
 .glow-effect {
-  animation: borderGlow 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: borderGlow 2.8s var(--ease-smooth) infinite;
 }
 
 /* === Dialog Animations === */
 
-.custom-dialog-enter-active {
-  animation: dialogSlideIn 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+.dialog-enter-active {
+  animation: dialogSlideIn 350ms var(--ease-spring);
 }
 
-.custom-dialog-leave-active {
-  animation: dialogSlideOut 200ms cubic-bezier(0.4, 0, 0.2, 1);
+.dialog-leave-active {
+  animation: dialogSlideOut 180ms var(--ease-out);
 }
 
 @keyframes dialogSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-24px) scale(0.95);
+    transform: translateY(-16px) scale(0.96);
   }
   to {
     opacity: 1;
@@ -268,14 +359,14 @@
   }
   to {
     opacity: 0;
-    transform: translateY(-16px) scale(0.98);
+    transform: translateY(-12px) scale(0.98);
   }
 }
 
 /* === Menu Animations === */
 
 .menu-item-hover {
-  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 220ms var(--ease-smooth);
   position: relative;
 }
 
@@ -287,35 +378,44 @@
   width: 3px;
   height: 0;
   background: var(--primary-gradient);
-  border-radius: 0 2px 2px 0;
+  border-radius: 0 3px 3px 0;
   transform: translateY(-50%);
-  transition: height 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: height 280ms var(--ease-spring);
 }
 
 .menu-item-hover:hover::before {
-  height: 24px;
+  height: 22px;
 }
 
 .menu-item-hover:hover {
-  padding-left: 24px !important;
+  padding-left: 22px !important;
   background: var(--bg-glass);
+}
+
+/* Menu item with spring hover */
+.menu-item-spring {
+  transition: all 250ms var(--ease-spring);
+}
+
+.menu-item-spring:hover {
+  transform: translateX(4px);
 }
 
 /* === Tag Animations === */
 
 .tag-glow {
-  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 180ms var(--ease-smooth);
 }
 
 .tag-glow:hover {
-  transform: scale(1.08);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
 }
 
 /* === Input Focus Animations === */
 
 .input-focus .el-input__wrapper {
-  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 220ms var(--ease-smooth);
 }
 
 .input-focus .el-input__wrapper:hover {
@@ -329,11 +429,11 @@
 /* === Table Row Interactions === */
 
 .table-row-hover {
-  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 180ms var(--ease-smooth);
 }
 
 .table-row-hover:hover {
-  background: var(--bg-glass) !important;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%) !important;
 }
 
 /* === Skeleton Loading === */
@@ -355,7 +455,8 @@
     var(--bg-secondary) 75%
   );
   background-size: 200px 100%;
-  animation: shimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: shimmer 1.4s var(--ease-smooth) infinite;
+  border-radius: var(--radius-sm);
 }
 
 /* === Reveal Animations === */
@@ -363,7 +464,7 @@
 @keyframes revealFromLeft {
   from {
     opacity: 0;
-    transform: translateX(-20px);
+    transform: translateX(-16px);
   }
   to {
     opacity: 1;
@@ -374,7 +475,7 @@
 @keyframes revealFromBottom {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -385,7 +486,7 @@
 @keyframes revealScale {
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.92);
   }
   to {
     opacity: 1;
@@ -394,28 +495,43 @@
 }
 
 .reveal-left {
-  animation: revealFromLeft 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: revealFromLeft 450ms var(--ease-spring) forwards;
 }
 
 .reveal-bottom {
-  animation: revealFromBottom 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: revealFromBottom 450ms var(--ease-spring) forwards;
 }
 
 .reveal-scale {
-  animation: revealScale 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: revealScale 350ms var(--ease-spring) forwards;
 }
 
 /* === Stat Card Entrance === */
 
 .stat-card-enter {
-  animation: fadeInUp 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  animation-delay: calc(var(--card-index, 0) * 100ms);
+  animation: fadeInUp 500ms var(--ease-spring) forwards;
+  animation-delay: calc(var(--card-index, 0) * 80ms);
   opacity: 0;
 }
 
 /* === Floating Animation === */
 
 @keyframes float {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(8px, -8px);
+  }
+  50% {
+    transform: translate(16px, 0);
+  }
+  75% {
+    transform: translate(8px, 8px);
+  }
+}
+
+@keyframes floatSubtle {
   0%, 100% {
     transform: translateY(0);
   }
@@ -425,26 +541,15 @@
 }
 
 .float-animation {
-  animation: float 4s ease-in-out infinite;
+  animation: floatSubtle 4.5s var(--ease-smooth) infinite;
 }
-
-/* === Theme Transition (Disabled for UX) === */
-
-/*
-.theme-transition * {
-  transition: background-color 400ms ease,
-              color 300ms ease,
-              border-color 300ms ease,
-              box-shadow 300ms ease !important;
-}
-*/
 
 /* === Scroll Reveal (JS triggered) === */
 
 .scroll-reveal {
   opacity: 0;
-  transform: translateY(24px);
-  transition: all 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(20px);
+  transition: all 500ms var(--ease-spring);
 }
 
 .scroll-reveal.visible {
@@ -474,12 +579,70 @@
 }
 
 .ripple:active::after {
-  animation: rippleEffect 600ms ease-out forwards;
+  animation: rippleEffect 500ms var(--ease-out) forwards;
 }
 
 @keyframes rippleEffect {
   to {
-    transform: translate(-50%, -50%) scale(40);
+    transform: translate(-50%, -50%) scale(35);
     opacity: 0;
   }
+}
+
+/* === Status Badge Animations === */
+
+@keyframes statusPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  50% {
+    box-shadow: 0 0 0 4px transparent;
+  }
+}
+
+.status-pulse {
+  animation: statusPulse 2s var(--ease-smooth) infinite;
+}
+
+/* === Entrance Orchestrations === */
+
+/* Stagger children animations */
+.stagger-in > * {
+  opacity: 0;
+  animation: fadeInUp 400ms var(--ease-spring) forwards;
+}
+
+.stagger-in > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-in > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-in > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-in > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-in > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-in > *:nth-child(6) { animation-delay: 300ms; }
+
+/* Page load animation */
+.page-enter {
+  animation: pageSlideIn 450ms var(--ease-spring) forwards;
+}
+
+@keyframes pageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === Theme Transition === */
+
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition: background-color 350ms var(--ease-smooth),
+              color 250ms var(--ease-smooth),
+              border-color 250ms var(--ease-smooth),
+              box-shadow 250ms var(--ease-smooth) !important;
 }

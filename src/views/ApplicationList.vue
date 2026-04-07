@@ -31,7 +31,8 @@
 
     <div class="table-section">
       <el-table
-        v-loading="tableLoading"
+        v-loading="tableLoading && tableData.length > 0"
+        element-loading-text="加载中..."
         :data="tableData"
         stripe
         table-layout="auto"
@@ -667,8 +668,10 @@ const deleteInterview = async (row) => {
 
 onMounted(async () => {
   loadQueryState()
-  await fetchData()
-  await openDetailFromRouteQuery()
+  // 非阻塞加载数据，避免首次进入显示loading旋转
+  fetchData().then(() => {
+    openDetailFromRouteQuery()
+  })
 })
 </script>
 
@@ -682,31 +685,134 @@ onMounted(async () => {
 .search-section,
 .table-section {
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
-  padding: 20px;
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-card);
+}
+
+.search-section {
+  animation: fadeInUp 350ms cubic-bezier(0.34, 1.56, 0.64, 1) 0ms forwards;
+  opacity: 0;
+}
+
+.table-section {
+  animation: fadeInUp 350ms cubic-bezier(0.34, 1.56, 0.64, 1) 80ms forwards;
+  opacity: 0;
 }
 
 .search-form {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 14px;
+  align-items: center;
+}
+
+.search-form :deep(.el-form-item) {
+  margin-bottom: 0;
+}
+
+.search-form :deep(.el-form-item__label) {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.search-form :deep(.el-input__wrapper) {
+  border-radius: 10px;
+}
+
+.search-form :deep(.el-select) {
+  width: 140px;
 }
 
 .company-cell {
   display: flex;
   align-items: center;
   gap: 8px;
+  font-weight: 500;
 }
 
 .pin-icon {
   color: #f59e0b;
+  transition: transform 200ms ease;
 }
 
+.pin-icon:hover {
+  transform: scale(1.15);
+}
+
+/* Table Styling */
+.table-section :deep(.el-table) {
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.table-section :deep(.el-table th.el-table__cell) {
+  background: var(--bg-secondary);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 14px 0;
+}
+
+.table-section :deep(.el-table td.el-table__cell) {
+  padding: 16px 0;
+  font-size: 13px;
+}
+
+.table-section :deep(.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell) {
+  background: var(--bg-secondary);
+}
+
+.table-section :deep(.el-table__body tr:hover > td.el-table__cell) {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%) !important;
+}
+
+.table-section :deep(.el-table__body tr) {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Status Tags */
+.table-section :deep(.el-tag) {
+  border-radius: 10px;
+  font-weight: 500;
+  border: none;
+  padding: 4px 12px;
+  font-size: 11px;
+  transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.table-section :deep(.el-tag:hover) {
+  transform: scale(1.05);
+}
+
+.table-section :deep(.el-tag.clickable) {
+  cursor: pointer;
+}
+
+/* Action Buttons */
 .actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: nowrap;
+}
+
+.actions :deep(.el-button) {
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 12px;
+  padding: 6px 12px;
+  transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.actions :deep(.el-button:hover) {
+  transform: translateY(-1px);
+}
+
+.actions :deep(.el-button:active) {
+  transform: scale(0.96);
 }
 
 .pagination-wrap {
@@ -715,17 +821,83 @@ onMounted(async () => {
   justify-content: flex-end;
 }
 
+.pagination-wrap :deep(.el-pagination button) {
+  border-radius: 10px;
+}
+
+.pagination-wrap :deep(.el-pager li) {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
 .record-toolbar {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   display: flex;
   justify-content: flex-end;
 }
 
 .muted {
   color: var(--text-muted);
+  font-size: 12px;
 }
 
 .clickable {
   cursor: pointer;
+}
+
+/* Dialog Styling */
+:deep(.el-dialog) {
+  border-radius: var(--radius-xl) !important;
+  overflow: hidden;
+}
+
+:deep(.el-dialog__header) {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+:deep(.el-dialog__title) {
+  font-weight: 700;
+  font-size: 17px;
+}
+
+:deep(.el-dialog__body) {
+  padding: 24px;
+}
+
+:deep(.el-dialog__footer) {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+:deep(.el-form-item__label) {
+  font-weight: 500;
+}
+
+:deep(.el-input__wrapper),
+:deep(.el-select__wrapper) {
+  border-radius: 10px;
+}
+
+/* Descriptions */
+:deep(.el-descriptions) {
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+:deep(.el-descriptions__label) {
+  font-weight: 500;
+  background: var(--bg-secondary);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

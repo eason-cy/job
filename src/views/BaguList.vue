@@ -45,13 +45,13 @@
         </el-form-item>
       </el-form>
       <div class="quick-filters">
-        <el-button size="small" @click="applyCategoryPreset('')">All</el-button>
-        <el-button size="small" @click="applyFamiliarityPreset(1)">Need Review</el-button>
+        <el-button size="small" @click="applyCategoryPreset('')">全部</el-button>
+        <el-button size="small" @click="applyFamiliarityPreset(1)">待复习</el-button>
       </div>
     </div>
 
     <div class="panel">
-      <el-table v-loading="tableLoading" :data="tableData" stripe row-key="id" table-layout="auto">
+      <el-table v-loading="tableLoading && tableData.length > 0" element-loading-text="加载中..." :data="tableData" stripe row-key="id" table-layout="auto">
         <el-table-column prop="category" label="分类" width="120" />
         <el-table-column label="问题" min-width="260">
           <template #default="{ row }">
@@ -301,7 +301,8 @@ const updateFamiliarity = async (row) => {
 
 onMounted(async () => {
   loadQueryState()
-  await Promise.all([fetchData(), fetchStats(), fetchCategories()])
+  // 非阻塞加载，避免首次进入显示loading旋转
+  Promise.all([fetchData(), fetchStats(), fetchCategories()])
 })
 </script>
 
@@ -309,41 +310,86 @@ onMounted(async () => {
 .bagu-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .panel {
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
-  padding: 16px;
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  animation: fadeInUp 350ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  opacity: 0;
 }
+
+.panel:nth-child(1) { animation-delay: 0ms; }
+.panel:nth-child(2) { animation-delay: 60ms; }
+.panel:nth-child(3) { animation-delay: 120ms; }
 
 .stats-panel {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
 .stat-item {
   background: var(--bg-glass);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 10px 12px;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 18px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  transition: all 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.stat-item:hover {
+  background: var(--primary-gradient-subtle);
+  transform: translateY(-2px);
+}
+
+.stat-item span {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.stat-item strong {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .search-form {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px;
+  align-items: center;
+}
+
+.search-form :deep(.el-form-item) {
+  margin-bottom: 0;
+}
+
+.search-form :deep(.el-input__wrapper) {
+  border-radius: 10px;
 }
 
 .quick-filters {
-  margin-top: 10px;
+  margin-top: 12px;
   display: flex;
-  gap: 8px;
+  gap: 10px;
+}
+
+.quick-filters :deep(.el-button) {
+  border-radius: 10px;
+  font-weight: 500;
+  transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.quick-filters :deep(.el-button:hover) {
+  transform: translateY(-1px);
 }
 
 .question-btn {
@@ -353,11 +399,65 @@ onMounted(async () => {
   text-align: left;
   cursor: pointer;
   padding: 0;
+  font-weight: 500;
+  transition: all 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.question-btn:hover {
+  color: var(--primary-dark);
+}
+
+/* Table Styling */
+.panel :deep(.el-table) {
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.panel :deep(.el-table th.el-table__cell) {
+  background: var(--bg-secondary);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 14px 0;
+}
+
+.panel :deep(.el-table td.el-table__cell) {
+  padding: 16px 0;
+  font-size: 13px;
+}
+
+.panel :deep(.el-table__body tr:hover > td.el-table__cell) {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%) !important;
+}
+
+.panel :deep(.el-rate) {
+  height: 20px;
+}
+
+.panel :deep(.el-button--small) {
+  border-radius: 8px;
+  font-size: 12px;
 }
 
 .pagination-wrap {
-  margin-top: 14px;
+  margin-top: 18px;
   display: flex;
   justify-content: flex-end;
+}
+
+.pagination-wrap :deep(.el-pager li) {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

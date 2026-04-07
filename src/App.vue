@@ -14,7 +14,7 @@
         <div class="brand-wrapper">
           <div class="brand-icon">
             <div class="brand-icon-inner">
-              <el-icon :size="28"><Document /></el-icon>
+              <el-icon :size="26"><Document /></el-icon>
             </div>
             <div class="brand-icon-ring"></div>
           </div>
@@ -80,8 +80,8 @@
       <!-- Sidebar Footer -->
       <div class="sidebar-footer">
         <!-- Theme Toggle -->
-        <div class="theme-control">
-          <div class="theme-toggle-track" :class="{ 'is-dark': isDark }" @click="toggleTheme">
+        <div class="theme-control" @click="toggleTheme">
+          <div class="theme-toggle-track" :class="{ 'is-dark': isDark }">
             <div class="theme-toggle-thumb">
               <el-icon v-if="isDark" class="theme-icon"><Moon /></el-icon>
               <el-icon v-else class="theme-icon"><Sunny /></el-icon>
@@ -204,31 +204,31 @@ html, body, #app {
 .ambient-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.4;
-  animation: float 8s ease-in-out infinite;
+  filter: blur(100px);
+  opacity: 0.35;
+  animation: floatSubtle 6s ease-in-out infinite;
 }
 
 .orb-1 {
-  width: 400px;
-  height: 400px;
+  width: 450px;
+  height: 450px;
   background: var(--primary-gradient);
-  top: 10%;
-  right: 20%;
+  top: 5%;
+  right: 15%;
   animation-delay: 0s;
 }
 
 .orb-2 {
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
-  bottom: 20%;
-  left: 30%;
-  animation-delay: -4s;
+  width: 350px;
+  height: 350px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  bottom: 15%;
+  left: 25%;
+  animation-delay: -3s;
 }
 
 [data-theme="dark"] .ambient-orb {
-  opacity: 0.25;
+  opacity: 0.2;
 }
 
 /* === Sidebar === */
@@ -245,27 +245,27 @@ html, body, #app {
 
 /* Brand Header */
 .sidebar-header {
-  padding: 32px 24px 24px;
+  padding: 28px 20px 20px;
   border-bottom: 1px solid var(--border-light);
 }
 
 .brand-wrapper {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .brand-icon {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
 }
 
 .brand-icon-inner {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   background: var(--primary-gradient);
-  border-radius: var(--radius-lg);
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -273,35 +273,44 @@ html, body, #app {
   box-shadow: var(--glow-primary);
   position: relative;
   z-index: 2;
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.brand-icon-inner:hover {
+  transform: scale(1.05);
 }
 
 .brand-icon-ring {
   position: absolute;
-  top: -4px;
-  left: -4px;
-  right: -4px;
-  bottom: -4px;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
   border: 2px solid var(--primary-light);
-  border-radius: var(--radius-xl);
-  opacity: 0.3;
-  animation: breathe 3s ease-in-out infinite;
+  border-radius: 17px;
+  opacity: 0.2;
+  transition: opacity 250ms ease;
+}
+
+.brand-icon:hover .brand-icon-ring {
+  opacity: 0.35;
 }
 
 .brand-text {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .brand-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text-primary);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
 }
 
 .brand-subtitle {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-muted);
   font-weight: 500;
 }
@@ -314,28 +323,28 @@ html, body, #app {
 }
 
 .nav-label {
-  padding: 0 24px 12px;
-  font-size: 11px;
+  padding: 0 20px 10px;
+  font-size: 10px;
   font-weight: 600;
   color: var(--text-light);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
 }
 
 .side-menu {
   border-right: none;
   background: transparent;
-  padding: 0 12px;
+  padding: 0 10px;
 }
 
 .side-menu .el-menu-item {
-  height: 52px;
-  line-height: 52px;
-  margin: 4px 0;
-  padding: 0 16px !important;
-  border-radius: var(--radius-md);
+  height: 48px;
+  line-height: 48px;
+  margin: 3px 0;
+  padding: 0 14px !important;
+  border-radius: 14px;
   color: var(--text-secondary);
-  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
 }
@@ -349,32 +358,34 @@ html, body, #app {
 .menu-icon-wrapper {
   width: 32px;
   height: 32px;
-  border-radius: var(--radius-sm);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg-glass);
-  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .menu-icon-wrapper .el-icon {
-  font-size: 18px;
+  font-size: 17px;
   color: var(--text-secondary);
-  transition: color 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: color 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .menu-text {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
 }
 
 /* Menu Hover */
 .side-menu .el-menu-item:hover {
   background: var(--bg-glass) !important;
+  transform: translateY(-2px);
 }
 
 .side-menu .el-menu-item:hover .menu-icon-wrapper {
   background: var(--primary-gradient-subtle);
+  transform: scale(1.05);
 }
 
 .side-menu .el-menu-item:hover .menu-icon-wrapper .el-icon {
@@ -407,44 +418,45 @@ html, body, #app {
 
 /* Sidebar Footer */
 .sidebar-footer {
-  padding: 20px 24px;
+  padding: 16px 20px;
   border-top: 1px solid var(--border-light);
 }
 
 .theme-control {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  border-radius: var(--radius-md);
+  gap: 14px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border-radius: 14px;
   background: var(--bg-glass);
   cursor: pointer;
-  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .theme-control:hover {
   background: var(--bg-secondary);
+  transform: translateY(-2px);
 }
 
 .theme-toggle-track {
-  width: 52px;
-  height: 28px;
+  width: 50px;
+  height: 26px;
   background: linear-gradient(135deg, var(--accent-amber) 0%, var(--accent-coral) 100%);
-  border-radius: var(--radius-full);
+  border-radius: 13px;
   position: relative;
-  transition: all 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+  transition: all 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.35);
 }
 
 .theme-toggle-track.is-dark {
   background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
 }
 
 .theme-toggle-thumb {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   background: white;
   border-radius: 50%;
   position: absolute;
@@ -453,8 +465,8 @@ html, body, #app {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .theme-toggle-track.is-dark .theme-toggle-thumb {
@@ -462,7 +474,7 @@ html, body, #app {
 }
 
 .theme-icon {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--accent-amber);
 }
 
@@ -471,7 +483,7 @@ html, body, #app {
 }
 
 .theme-label {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-secondary);
   font-weight: 500;
 }
@@ -481,17 +493,17 @@ html, body, #app {
   align-items: center;
   gap: 8px;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
 }
 
 .footer-icon {
-  font-size: 16px;
+  font-size: 14px;
   color: var(--primary-color);
 }
 
 .footer-text {
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
 /* === Main Container === */
@@ -512,30 +524,30 @@ html, body, #app {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 40px;
-  height: 72px;
+  padding: 0 36px;
+  height: 68px;
   box-shadow: var(--shadow-sm);
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .page-title {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.025em;
 }
 
 .title-accent {
-  width: 40px;
-  height: 4px;
+  width: 36px;
+  height: 3px;
   background: var(--primary-gradient);
-  border-radius: var(--radius-full);
+  border-radius: 2px;
 }
 
 .header-right {
@@ -545,36 +557,37 @@ html, body, #app {
 }
 
 .theme-btn {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border: none;
   background: var(--bg-glass);
-  border-radius: var(--radius-md);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .theme-btn:hover {
   background: var(--primary-gradient-subtle);
   color: var(--primary-color);
+  transform: translateY(-2px);
 }
 
 .theme-btn .el-icon {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 /* Main Content */
 .main-content {
-  padding: 32px 40px;
+  padding: 28px 36px;
   overflow-y: auto;
   position: relative;
 }
 
 /* Scrollbar Styling */
 .main-content::-webkit-scrollbar {
-  width: 8px;
+  width: 7px;
 }
 
 .main-content::-webkit-scrollbar-track {
@@ -583,7 +596,7 @@ html, body, #app {
 
 .main-content::-webkit-scrollbar-thumb {
   background: var(--border-color);
-  border-radius: var(--radius-full);
+  border-radius: 4px;
 }
 
 .main-content::-webkit-scrollbar-thumb:hover {
@@ -591,15 +604,26 @@ html, body, #app {
 }
 
 /* === Float Animation for Ambient === */
-@keyframes float {
+@keyframes floatSubtle {
   0%, 100% {
     transform: translate(0, 0);
   }
   33% {
-    transform: translate(30px, -20px);
+    transform: translate(24px, -16px);
   }
   66% {
-    transform: translate(-20px, 20px);
+    transform: translate(-16px, 16px);
+  }
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.015);
+    opacity: 0.92;
   }
 }
 </style>
