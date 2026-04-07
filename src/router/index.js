@@ -1,35 +1,30 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Dashboard from '../views/Dashboard.vue'
-import ApplicationList from '../views/ApplicationList.vue'
-import AlgorithmList from '../views/AlgorithmList.vue'
-import BaguList from '../views/BaguList.vue'
-import InterviewRecords from '../views/InterviewRecords.vue'
 
 const routes = [
   {
     path: '/',
     name: 'Dashboard',
-    component: Dashboard
+    component: () => import('../views/Dashboard.vue')
   },
   {
     path: '/applications',
     name: 'ApplicationList',
-    component: ApplicationList
+    component: () => import('../views/ApplicationList.vue')
   },
   {
     path: '/algorithms',
     name: 'AlgorithmList',
-    component: AlgorithmList
+    component: () => import('../views/AlgorithmList.vue')
   },
   {
     path: '/bagus',
     name: 'BaguList',
-    component: BaguList
+    component: () => import('../views/BaguList.vue')
   },
   {
     path: '/interview-records',
     name: 'InterviewRecords',
-    component: InterviewRecords
+    component: () => import('../views/InterviewRecords.vue')
   }
 ]
 

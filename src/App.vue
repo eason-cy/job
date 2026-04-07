@@ -129,6 +129,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { Document, DataAnalysis, List, Cpu, Notebook, ChatLineRound, Moon, Sunny, School } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const isDark = ref(localStorage.getItem('theme') === 'dark')

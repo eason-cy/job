@@ -1,11 +1,13 @@
 // 本地数据存储服务 - 使用 localStorage
 const STORAGE_KEY = 'job_tracker_data'
+const DATA_SCHEMA_VERSION = 2
 
 // 获取所有数据
 const getData = () => {
   const data = localStorage.getItem(STORAGE_KEY)
   if (data) {
-    const parsed = JSON.parse(data)
+    try {
+      const parsed = JSON.parse(data)
     // 确保所有字段都存在（兼容旧数据）
     return {
       applications: parsed.applications || [],
@@ -13,6 +15,9 @@ const getData = () => {
       interviews: parsed.interviews || [],
       algorithms: parsed.algorithms || [],
       bagus: parsed.bagus || []
+    }
+    } catch (error) {
+      console.error('Failed to parse local data, reset to empty schema:', error)
     }
   }
   return {
@@ -26,7 +31,16 @@ const getData = () => {
 
 // 保存数据
 const saveData = (data) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+  const payload = {
+    ...data,
+    applications: Array.isArray(data.applications) ? data.applications : [],
+    writtenTests: Array.isArray(data.writtenTests) ? data.writtenTests : [],
+    interviews: Array.isArray(data.interviews) ? data.interviews : [],
+    algorithms: Array.isArray(data.algorithms) ? data.algorithms : [],
+    bagus: Array.isArray(data.bagus) ? data.bagus : [],
+    schemaVersion: DATA_SCHEMA_VERSION
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
 }
 
 // 生成唯一ID
@@ -241,6 +255,10 @@ export const interviewApi = {
     }
 
     // 按日期倒序
+    if (params.familiarity) {
+      result = result.filter(item => Number(item.familiarity) === Number(params.familiarity))
+    }
+
     result.sort((a, b) => new Date(b.interviewDate) - new Date(a.interviewDate))
 
     return Promise.resolve({ data: result })
@@ -636,7 +654,7 @@ export const baguApi = {
 
 // 导出数据（备份用）
 export const exportData = () => {
-  const data = getData()
+  const data = { ...getData(), schemaVersion: DATA_SCHEMA_VERSION }
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -647,16 +665,53 @@ export const exportData = () => {
 }
 
 // 导入数据
+export const exportTemplate = () => {
+  const template = {
+    schemaVersion: DATA_SCHEMA_VERSION,
+    applications: [
+      {
+        id: 'example-app-id',
+        companyName: '示例公司',
+        position: '前端开发实习生',
+        jobType: '校招',
+        applyDate: '2026-01-01',
+        status: '待处理',
+        applyLink: 'https://example.com',
+        remark: '示例备注'
+      }
+    ],
+    writtenTests: [],
+    interviews: [],
+    algorithms: [],
+    bagus: []
+  }
+  const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = '导入模板_job_tracker.json'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+const isValidImportPayload = (data) => {
+  return data &&
+    Array.isArray(data.applications) &&
+    Array.isArray(data.writtenTests) &&
+    Array.isArray(data.interviews)
+}
+
 export const importData = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = (e) => {
       try {
         const data = JSON.parse(e.target.result)
-        if (data.applications && data.writtenTests && data.interviews) {
+        if (isValidImportPayload(data)) {
           // 兼容旧数据格式，补充新字段
           if (!data.algorithms) data.algorithms = []
           if (!data.bagus) data.bagus = []
+          data.schemaVersion = DATA_SCHEMA_VERSION
           saveData(data)
           resolve()
         } else {

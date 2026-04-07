@@ -1,12 +1,26 @@
-import { defineConfig } from 'vite'
+﻿import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [vue()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vue: ['vue', 'vue-router'],
+          elementPlus: ['element-plus', '@element-plus/icons-vue'],
+          echarts: ['echarts']
+        }
+      }
+    }
+  },
   base: '/',
   server: {
     port: 8888,
-    host: 'localhost',  // 只监听 localhost，避免多地址访问导致数据隔离
-    open: 'http://localhost:8888'  // 强制使用 localhost 打开
+    host: 'localhost',
+    open: 'http://localhost:8888'
+  },
+  test: {
+    environment: 'jsdom'
   }
 })

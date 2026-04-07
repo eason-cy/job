@@ -1,87 +1,71 @@
-<template>
+﻿<template>
   <div class="dashboard">
-    <!-- Hero Stats Grid -->
-    <div class="stats-hero">
-      <div
-        class="stat-card"
-        v-for="(stat, index) in statusStats"
-        :key="stat.status"
-        :style="{ '--card-index': index }"
-      >
-        <div class="stat-card-inner">
-          <div class="stat-glow" :style="{ background: stat.gradient }"></div>
-          <div class="stat-visual">
-            <div class="stat-icon-wrapper" :style="{ background: stat.gradient }">
-              <component :is="stat.icon" :size="28" />
-            </div>
-            <div class="stat-ring"></div>
-          </div>
-          <div class="stat-data">
-            <div class="stat-value number-animate">{{ stat.count }}</div>
-            <div class="stat-label">{{ stat.label }}</div>
-          </div>
-          <div class="stat-indicator">
-            <div class="indicator-bar" :style="{ background: stat.gradient, width: stat.percentage + '%' }"></div>
-          </div>
+    <div class="stats-grid">
+      <div v-for="item in statusStats" :key="item.status" class="stat-card">
+        <div class="stat-head">
+          <el-icon><component :is="item.icon" /></el-icon>
+          <span>{{ item.label }}</span>
         </div>
+        <div class="stat-value">{{ item.count }}</div>
       </div>
     </div>
 
-    <!-- Quick Actions Section -->
-    <div class="actions-section">
-      <div class="section-header">
-        <h3 class="section-title">快捷操作</h3>
-        <div class="section-accent"></div>
-      </div>
+    <div class="panel actions-panel">
+      <h3>快捷操作</h3>
       <div class="actions-grid">
-        <div class="action-card btn-click" @click="$router.push('/applications')">
-          <div class="action-icon">
-            <el-icon :size="24"><Plus /></el-icon>
-          </div>
-          <span class="action-text">新增投递</span>
-        </div>
-        <div class="action-card btn-click" @click="$router.push('/applications')">
-          <div class="action-icon">
-            <el-icon :size="24"><List /></el-icon>
-          </div>
-          <span class="action-text">查看列表</span>
-        </div>
-        <div class="action-card btn-click" @click="handleExport">
-          <div class="action-icon">
-            <el-icon :size="24"><Download /></el-icon>
-          </div>
-          <span class="action-text">导出备份</span>
-        </div>
-        <el-upload class="action-upload" :show-file-list="false" accept=".json" :before-upload="handleImport">
-          <div class="action-card btn-click">
-            <div class="action-icon">
-              <el-icon :size="24"><Upload /></el-icon>
-            </div>
-            <span class="action-text">导入备份</span>
-          </div>
+        <button class="action-btn" type="button" @click="router.push('/applications')">新增投递</button>
+        <button class="action-btn" type="button" @click="router.push('/applications')">查看列表</button>
+        <button class="action-btn" type="button" @click="handleExport">导出备份</button>
+        <button class="action-btn" type="button" @click="handleExportTemplate">下载模板</button>
+        <el-upload class="upload-btn" :show-file-list="false" accept=".json" :before-upload="handleImport">
+          <button class="action-btn" type="button">导入备份</button>
         </el-upload>
       </div>
     </div>
 
-    <!-- Charts Section -->
-    <div class="charts-section">
-      <div class="section-header">
-        <h3 class="section-title">状态分布</h3>
-        <div class="section-accent"></div>
+    <div class="panel">
+      <h3>待办提醒</h3>
+      <el-empty v-if="!todoItems.length" description="暂无待办" :image-size="80" />
+      <div v-else class="todo-grid">
+        <button
+          v-for="item in todoItems"
+          :key="item.id"
+          class="todo-item"
+          type="button"
+          @click="router.push(item.path)"
+        >
+          <div class="todo-title">{{ item.title }}</div>
+          <div class="todo-desc">{{ item.desc }}</div>
+        </button>
       </div>
-      <div class="chart-container-wrapper">
-        <div ref="pieChartRef" class="chart-container"></div>
-      </div>
+    </div>
+
+    <div class="panel" v-loading="loading">
+      <h3>状态分布</h3>
+      <div ref="pieChartRef" class="chart"></div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue'
-import * as echarts from 'echarts'
-import { applicationApi, exportData, importData } from '../api'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { use } from 'echarts/core'
+import { PieChart } from 'echarts/charts'
+import { TooltipComponent, LegendComponent } from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+import { init } from 'echarts/core'
 import { ElMessage } from 'element-plus'
-import { Clock, EditPen, Edit, ChatDotRound, Trophy, CircleClose, Plus, List, Download, Upload } from '@element-plus/icons-vue'
+import { Clock, EditPen, Edit, ChatDotRound, Trophy, CircleClose } from '@element-plus/icons-vue'
+import { applicationApi, interviewApi, exportData, exportTemplate, importData } from '../api'
+import { logError } from '../utils/logger'
+
+use([PieChart, TooltipComponent, LegendComponent, CanvasRenderer])
+
+const router = useRouter()
+const loading = ref(false)
+const pieChartRef = ref(null)
+let pieChart = null
 
 const statistics = ref({
   total: 0,
@@ -90,144 +74,126 @@ const statistics = ref({
   statusDistribution: {}
 })
 
-const pieChartRef = ref(null)
-let pieChart = null
+const todoItems = ref([])
 
 const statusStats = computed(() => {
-  const configs = [
-    { status: '待处理', label: '待处理', icon: Clock, gradient: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)' },
-    { status: '测评中', label: '测评中', icon: EditPen, gradient: 'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)' },
-    { status: '笔试中', label: '笔试中', icon: Edit, gradient: 'linear-gradient(135deg, #6366f1 0%, #818cf8 100%)' },
-    { status: '面试中', label: '面试中', icon: ChatDotRound, gradient: 'linear-gradient(135deg, #0891b2 0%, #06b6d4 100%)' },
-    { status: '已offer', label: '已获Offer', icon: Trophy, gradient: 'linear-gradient(135deg, #059669 0%, #10b981 100%)' },
-    { status: '已淘汰', label: '已淘汰', icon: CircleClose, gradient: 'linear-gradient(135deg, #475569 0%, #64748b 100%)' }
+  const cfg = [
+    { status: '待处理', label: '待处理', icon: Clock },
+    { status: '测评中', label: '测评中', icon: EditPen },
+    { status: '笔试中', label: '笔试中', icon: Edit },
+    { status: '面试中', label: '面试中', icon: ChatDotRound },
+    { status: '已offer', label: '已 Offer', icon: Trophy },
+    { status: '已淘汰', label: '已淘汰', icon: CircleClose }
   ]
-
-  const total = statistics.value.total || 1
-  return configs.map(config => ({
-    ...config,
-    count: statistics.value.statusDistribution[config.status] || 0,
-    percentage: Math.round((statistics.value.statusDistribution[config.status] || 0) / total * 100)
+  return cfg.map((item) => ({
+    ...item,
+    count: statistics.value.statusDistribution[item.status] || 0
   }))
 })
 
-const fetchStatistics = async () => {
-  try {
-    const response = await applicationApi.getStatistics()
-    statistics.value = response.data
-    renderPieChart()
-  } catch (error) {
-    console.error('获取统计数据失败:', error)
-  }
-}
+const getChartColors = () => ({
+  待处理: '#3b82f6',
+  测评中: '#0ea5e9',
+  笔试中: '#6366f1',
+  面试中: '#06b6d4',
+  已offer: '#10b981',
+  已淘汰: '#64748b'
+})
 
-const getChartColors = () => {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
-  if (isDark) {
-    return {
-      '待处理': '#60a5fa',
-      '测评中': '#38bdf8',
-      '笔试中': '#818cf8',
-      '面试中': '#22d3ee',
-      '已offer': '#34d399',
-      '已淘汰': '#94a3b8'
+const buildTodoItems = (interviews) => {
+  const start = new Date()
+  start.setHours(0, 0, 0, 0)
+  const end = new Date(start)
+  end.setDate(start.getDate() + 7)
+
+  const upcoming = interviews
+    .filter((item) => item.interviewDate)
+    .filter((item) => {
+      const d = new Date(item.interviewDate)
+      return d >= start && d <= end
+    })
+    .slice(0, 3)
+    .map((item) => ({
+      id: `interview-${item.id}`,
+      title: `面试提醒：${item.companyName || '未命名公司'}`,
+      desc: `${item.interviewDate} · 第${item.round || 1}轮`,
+      path: '/interview-records'
+    }))
+
+  const summary = [
+    {
+      id: 'pending-summary',
+      title: `待处理投递 ${statistics.value.pending || 0} 项`,
+      desc: '建议补充状态和备注',
+      path: '/applications'
+    },
+    {
+      id: 'interview-summary',
+      title: `面试中流程 ${statistics.value.interviewing || 0} 项`,
+      desc: '建议优先跟进面试反馈',
+      path: '/applications'
     }
-  }
-  return {
-    '待处理': '#3b82f6',
-    '测评中': '#0ea5e9',
-    '笔试中': '#6366f1',
-    '面试中': '#06b6d4',
-    '已offer': '#10b981',
-    '已淘汰': '#64748b'
-  }
+  ]
+
+  return [...upcoming, ...summary].slice(0, 4)
 }
 
 const renderPieChart = () => {
   if (!pieChartRef.value) return
-
   if (pieChart) {
     pieChart.dispose()
   }
 
-  pieChart = echarts.init(pieChartRef.value)
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+  pieChart = init(pieChartRef.value)
   const colorMap = getChartColors()
-
   const data = Object.entries(statistics.value.statusDistribution).map(([name, value]) => ({
     name,
     value,
     itemStyle: { color: colorMap[name] || '#10b981' }
   }))
 
-  const option = {
-    tooltip: {
-      trigger: 'item',
-      formatter: '{b}: {c} ({d}%)',
-      backgroundColor: isDark ? '#1e293b' : '#fff',
-      borderColor: isDark ? '#334155' : '#e2e8f0',
-      borderRadius: 12,
-      padding: [12, 16],
-      textStyle: {
-        color: isDark ? '#f1f5f9' : '#0f172a',
-        fontSize: 14,
-        fontWeight: 500
-      },
-      extraCssText: 'box-shadow: 0 8px 16px rgba(0,0,0,0.1);'
-    },
-    legend: {
-      orient: 'horizontal',
-      bottom: 24,
-      left: 'center',
-      itemWidth: 12,
-      itemHeight: 12,
-      itemGap: 24,
-      textStyle: {
-        color: isDark ? '#94a3b8' : '#64748b',
-        fontSize: 13,
-        fontWeight: 500
-      },
-      icon: 'circle'
-    },
+  pieChart.setOption({
+    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    legend: { bottom: 0, left: 'center' },
     series: [
       {
         type: 'pie',
-        radius: ['45%', '72%'],
-        center: ['50%', '45%'],
-        avoidLabelOverlap: true,
-        itemStyle: {
-          borderRadius: 8,
-          borderColor: isDark ? '#1e293b' : '#fff',
-          borderWidth: 3
-        },
-        label: {
-          show: false
-        },
-        emphasis: {
-          label: {
-            show: true,
-            fontSize: 16,
-            fontWeight: 700,
-            color: isDark ? '#f1f5f9' : '#0f172a'
-          },
-          itemStyle: {
-            shadowBlur: 20,
-            shadowOffsetX: 0,
-            shadowOffsetY: 4,
-            shadowColor: 'rgba(0, 0, 0, 0.25)'
-          }
-        },
-        data
+        radius: ['42%', '70%'],
+        center: ['50%', '42%'],
+        data,
+        label: { show: false },
+        emphasis: { label: { show: true, fontSize: 14, fontWeight: 600 } }
       }
     ]
-  }
+  })
+}
 
-  pieChart.setOption(option)
+const fetchStatistics = async () => {
+  loading.value = true
+  try {
+    const [statsResp, interviewsResp] = await Promise.all([
+      applicationApi.getStatistics(),
+      interviewApi.listAll({})
+    ])
+    statistics.value = statsResp.data
+    todoItems.value = buildTodoItems(interviewsResp.data || [])
+    renderPieChart()
+  } catch (error) {
+    logError('dashboard:statistics', error)
+    ElMessage.error('获取统计信息失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 const handleExport = () => {
   exportData()
   ElMessage.success('数据已导出')
+}
+
+const handleExportTemplate = () => {
+  exportTemplate()
+  ElMessage.success('模板已导出')
 }
 
 const handleImport = async (file) => {
@@ -241,36 +207,31 @@ const handleImport = async (file) => {
   return false
 }
 
-const handleThemeChange = () => {
-  renderPieChart()
-}
-
-let themeObserver = null
-
-onMounted(() => {
-  fetchStatistics()
-  themeObserver = new MutationObserver(handleThemeChange)
-  themeObserver.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['data-theme']
-  })
-  window.addEventListener('resize', handleResize)
-})
-
 const handleResize = () => {
   if (pieChart) {
     pieChart.resize()
   }
 }
 
+let themeObserver = null
+onMounted(() => {
+  fetchStatistics()
+  window.addEventListener('resize', handleResize)
+  themeObserver = new MutationObserver(() => renderPieChart())
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme']
+  })
+})
+
 onUnmounted(() => {
-  if (pieChart) {
-    pieChart.dispose()
-  }
+  window.removeEventListener('resize', handleResize)
   if (themeObserver) {
     themeObserver.disconnect()
   }
-  window.removeEventListener('resize', handleResize)
+  if (pieChart) {
+    pieChart.dispose()
+  }
 })
 </script>
 
@@ -278,237 +239,101 @@ onUnmounted(() => {
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  max-width: 1400px;
+  gap: 20px;
 }
 
-/* === Stats Hero Grid === */
-.stats-hero {
+.stats-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stat-card,
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
 }
 
 .stat-card {
-  position: relative;
-  animation: fadeInUp 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  animation-delay: calc(var(--card-index, 0) * 80ms);
-  opacity: 0;
+  padding: 14px;
 }
 
-.stat-card-inner {
-  position: relative;
-  background: var(--bg-card);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
-  padding: 24px 20px;
+.stat-head {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
-  transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-}
-
-.stat-card-inner:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-xl);
-  border-color: var(--border-strong);
-}
-
-.stat-glow {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  opacity: 0.06;
-  pointer-events: none;
-}
-
-.stat-visual {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.stat-icon-wrapper {
-  width: 52px;
-  height: 52px;
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  position: relative;
-  z-index: 2;
-}
-
-.stat-ring {
-  position: absolute;
-  width: 68px;
-  height: 68px;
-  border: 2px dashed var(--border-color);
-  border-radius: 50%;
-  opacity: 0.5;
-}
-
-.stat-data {
-  display: flex;
-  flex-direction: column;
   align-items: center;
   gap: 8px;
+  color: var(--text-secondary);
 }
 
 .stat-value {
-  font-size: 36px;
-  font-weight: 800;
-  color: var(--text-primary);
-  line-height: 1;
-  letter-spacing: -0.04em;
-}
-
-.stat-label {
-  font-size: 13px;
-  color: var(--text-muted);
-  font-weight: 500;
-  text-align: center;
-}
-
-.stat-indicator {
-  height: 6px;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-}
-
-.indicator-bar {
-  height: 100%;
-  border-radius: var(--radius-full);
-  transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
-  animation-delay: calc(var(--card-index, 0) * 100ms + 400ms);
-}
-
-/* === Section Headers === */
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.section-title {
-  font-size: 18px;
+  margin-top: 8px;
+  font-size: 30px;
   font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
 }
 
-.section-accent {
-  width: 32px;
-  height: 4px;
-  background: var(--primary-gradient);
-  border-radius: var(--radius-full);
+.panel {
+  padding: 18px;
 }
 
-/* === Actions Section === */
-.actions-section {
-  background: var(--bg-card);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
-  padding: 24px;
+.panel h3 {
+  margin: 0 0 14px;
 }
 
 .actions-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
 }
 
-.action-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 20px;
-  background: var(--bg-glass);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  cursor: pointer;
-  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.action-card:hover {
-  background: var(--primary-gradient-subtle);
-  border-color: var(--primary-color);
-  transform: translateY(-2px);
-}
-
-.action-card:hover .action-icon {
-  background: var(--primary-gradient);
-  color: white;
-}
-
-.action-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-secondary);
-  color: var(--primary-color);
-  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.action-text {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.action-card:hover .action-text {
-  color: var(--primary-color);
-}
-
-.action-upload {
-  display: block !important;
-}
-
-.action-upload :deep(.el-upload) {
-  display: block !important;
-}
-
-/* === Charts Section === */
-.charts-section {
-  background: var(--bg-card);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
-  padding: 24px;
-}
-
-.chart-container-wrapper {
-  height: 340px;
-}
-
-.chart-container {
+.action-btn {
   width: 100%;
-  height: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  padding: 10px 12px;
+  cursor: pointer;
 }
 
-/* === Animations === */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.action-btn:hover {
+  border-color: var(--primary-color);
+}
+
+.upload-btn {
+  display: block;
+}
+
+.upload-btn :deep(.el-upload) {
+  display: block;
+}
+
+.todo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.todo-item {
+  text-align: left;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-glass);
+  padding: 12px;
+  cursor: pointer;
+}
+
+.todo-title {
+  font-weight: 600;
+}
+
+.todo-desc {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.chart {
+  height: 320px;
 }
 </style>

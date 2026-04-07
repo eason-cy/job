@@ -1,0 +1,20 @@
+﻿{
+  "name": "project-local-plugins",
+  "interface": {
+    "displayName": "Project Local Plugins"
+  },
+  "plugins": [
+    {
+      "name": "frontend-design",
+      "source": {
+        "source": "local",
+        "path": "./plugins/frontend-design"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Design"
+    }
+  ]
+}

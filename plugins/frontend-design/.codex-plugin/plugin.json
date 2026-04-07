@@ -1,0 +1,27 @@
+﻿{
+  "name": "frontend-design",
+  "version": "1.0.0",
+  "description": "Frontend design skill for UI/UX implementation",
+  "author": {
+    "name": "Anthropic",
+    "email": "support@anthropic.com"
+  },
+  "license": "See plugin source license",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Frontend Design",
+    "shortDescription": "High-quality UI design skill",
+    "longDescription": "Create distinctive, production-grade frontend interfaces with a clear aesthetic direction.",
+    "developerName": "Anthropic",
+    "category": "Design",
+    "capabilities": [
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Design a bold landing page for this product",
+      "Build a polished dashboard UI with animations",
+      "Create a distinctive settings panel in Vue"
+    ],
+    "brandColor": "#0A0A0A"
+  }
+}
