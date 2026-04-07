@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <el-container class="app-container">
     <!-- Ambient Background Effect -->
     <div class="ambient-bg">
@@ -19,7 +19,7 @@
             <div class="brand-icon-ring"></div>
           </div>
           <div class="brand-text">
-            <span class="brand-title">鍗椾含閭數澶у</span>
+            <span class="brand-title">南京邮电大学</span>
             <span class="brand-subtitle">校招投递管理系统</span>
           </div>
         </div>
@@ -27,7 +27,7 @@
 
       <!-- Navigation Menu -->
       <nav class="nav-section">
-        <div class="nav-label">瀵艰埅鑿滃崟</div>
+        <div class="nav-label">导航菜单</div>
         <el-menu
           :default-active="$route.path"
           router
@@ -39,7 +39,7 @@
               <div class="menu-icon-wrapper">
                 <el-icon><DataAnalysis /></el-icon>
               </div>
-              <span class="menu-text">鏁版嵁鐪嬫澘</span>
+              <span class="menu-text">数据看板</span>
             </div>
           </el-menu-item>
           <el-menu-item index="/applications" class="menu-item">
@@ -55,7 +55,7 @@
               <div class="menu-icon-wrapper">
                 <el-icon><Cpu /></el-icon>
               </div>
-              <span class="menu-text">绠楁硶棰樺簱</span>
+              <span class="menu-text">算法题库</span>
             </div>
           </el-menu-item>
           <el-menu-item index="/bagus" class="menu-item">
@@ -63,7 +63,7 @@
               <div class="menu-icon-wrapper">
                 <el-icon><Notebook /></el-icon>
               </div>
-              <span class="menu-text">鍏偂棰樺簱</span>
+              <span class="menu-text">八股题库</span>
             </div>
           </el-menu-item>
           <el-menu-item index="/interview-records" class="menu-item">
@@ -71,7 +71,7 @@
               <div class="menu-icon-wrapper">
                 <el-icon><ChatLineRound /></el-icon>
               </div>
-              <span class="menu-text">闈㈣瘯璁板綍</span>
+              <span class="menu-text">面试记录</span>
             </div>
           </el-menu-item>
         </el-menu>
@@ -87,13 +87,13 @@
               <el-icon v-else class="theme-icon"><Sunny /></el-icon>
             </div>
           </div>
-          <span class="theme-label">{{ isDark ? '鏆楄壊涓婚' : '浜壊涓婚' }}</span>
+          <span class="theme-label">{{ isDark ? '暗色主题' : '亮色主题' }}</span>
         </div>
 
         <!-- Footer Info -->
         <div class="footer-brand">
           <el-icon class="footer-icon"><School /></el-icon>
-          <span class="footer-text">NUPT 路 2026</span>
+          <span class="footer-text">NUPT · 2026</span>
         </div>
       </div>
     </el-aside>
@@ -117,9 +117,9 @@
       <!-- Main Content -->
       <el-main class="main-content">
         <router-view v-slot="{ Component }">
-          <transition name="slide-left" mode="out-in">
+          <keep-alive>
             <component :is="Component" />
-          </transition>
+          </keep-alive>
         </router-view>
       </el-main>
     </el-container>
@@ -135,13 +135,13 @@ const isDark = ref(localStorage.getItem('theme') === 'dark')
 
 const pageTitle = computed(() => {
   const titles = {
-    '/': '鏁版嵁鐪嬫澘',
+    '/': '数据看板',
     '/applications': '投递列表',
-    '/algorithms': '绠楁硶棰樺簱',
-    '/bagus': '鍏偂棰樺簱',
-    '/interview-records': '闈㈣瘯璁板綍'
+    '/algorithms': '算法题库',
+    '/bagus': '八股题库',
+    '/interview-records': '面试记录'
   }
-  return titles[route.path] || '鏁版嵁鐪嬫澘'
+  return titles[route.path] || '数据看板'
 })
 
 const toggleTheme = () => {
