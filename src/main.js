@@ -1,5 +1,10 @@
 ﻿import { createApp } from 'vue'
-import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import {
+  Document, DataAnalysis, List, Cpu, Notebook, ChatLineRound,
+  Moon, Sunny, School, Clock, EditPen, Edit, ChatDotRound,
+  Trophy, CircleClose, Plus, Download, Upload, ArrowRight,
+  Link, Search, Star
+} from '@element-plus/icons-vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
@@ -51,7 +56,14 @@ initPresetData()
 
 const app = createApp(App)
 
-for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+// 只注册实际使用的图标，减少初始 bundle 大小
+const usedIcons = {
+  Document, DataAnalysis, List, Cpu, Notebook, ChatLineRound,
+  Moon, Sunny, School, Clock, EditPen, Edit, ChatDotRound,
+  Trophy, CircleClose, Plus, Download, Upload, ArrowRight,
+  Link, Search, Star
+}
+for (const [key, component] of Object.entries(usedIcons)) {
   app.component(key, component)
 }
 
