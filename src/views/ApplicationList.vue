@@ -691,16 +691,6 @@ onMounted(async () => {
   box-shadow: var(--shadow-card);
 }
 
-.search-section {
-  animation: fadeInUp 350ms cubic-bezier(0.34, 1.56, 0.64, 1) 0ms forwards;
-  opacity: 0;
-}
-
-.table-section {
-  animation: fadeInUp 350ms cubic-bezier(0.34, 1.56, 0.64, 1) 80ms forwards;
-  opacity: 0;
-}
-
 .search-form {
   display: flex;
   flex-wrap: wrap;

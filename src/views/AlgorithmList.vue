@@ -395,13 +395,7 @@ onMounted(async () => {
   border-radius: var(--radius-lg);
   padding: 20px;
   box-shadow: var(--shadow-card);
-  animation: fadeInUp 350ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  opacity: 0;
 }
-
-.panel:nth-child(1) { animation-delay: 0ms; }
-.panel:nth-child(2) { animation-delay: 60ms; }
-.panel:nth-child(3) { animation-delay: 120ms; }
 
 .stats-panel {
   display: grid;

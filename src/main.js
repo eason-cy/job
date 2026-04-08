@@ -69,23 +69,4 @@ for (const [key, component] of Object.entries(usedIcons)) {
 
 app.use(ElementPlus, { locale: zhCn })
 app.use(router)
-
-// 预加载所有路由组件 - 应用挂载后立即加载所有页面
-router.isReady().then(() => {
-  router.getRoutes().forEach(route => {
-    if (route.name) {
-      // 触发组件预加载
-      router.resolve(route.name).matched.forEach(record => {
-        if (record.components?.default) {
-          // 对于懒加载组件，调用它会触发 import
-          const component = record.components.default
-          if (typeof component === 'function') {
-            component()
-          }
-        }
-      })
-    }
-  })
-})
-
 app.mount('#app')

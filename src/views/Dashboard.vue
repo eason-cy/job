@@ -12,7 +12,6 @@
           :key="item.status"
           class="stat-card"
           :class="{ 'stat-card--highlight': index === 4 && item.count > 0 }"
-          :style="{ '--delay': index * 60 + 'ms' }"
         >
           <div class="stat-card__icon" :style="{ background: item.gradient }">
             <el-icon><component :is="item.icon" /></el-icon>
@@ -382,9 +381,6 @@ onUnmounted(() => {
   background: var(--bg-glass);
   border-radius: var(--radius-md);
   transition: all 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  opacity: 0;
-  animation: slideIn 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  animation-delay: var(--delay);
 }
 
 .stat-card:hover {
