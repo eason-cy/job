@@ -132,6 +132,7 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const isDark = ref(localStorage.getItem('theme') === 'dark')
+const isTransitioning = ref(false)
 
 const pageTitle = computed(() => {
   const titles = {
@@ -145,10 +146,20 @@ const pageTitle = computed(() => {
 })
 
 const toggleTheme = () => {
+  // Add transition class for smooth animation
+  isTransitioning.value = true
+  document.documentElement.classList.add('theme-transition')
+
   isDark.value = !isDark.value
   const theme = isDark.value ? 'dark' : 'light'
   document.documentElement.setAttribute('data-theme', theme)
   localStorage.setItem('theme', theme)
+
+  // Remove transition class after animation completes
+  setTimeout(() => {
+    document.documentElement.classList.remove('theme-transition')
+    isTransitioning.value = false
+  }, 500)
 }
 
 onMounted(() => {
@@ -566,16 +577,36 @@ html, body, #app {
   align-items: center;
   justify-content: center;
   transition: all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: var(--text-secondary);
 }
 
 .theme-btn:hover {
   background: var(--primary-gradient-subtle);
-  color: var(--primary-color);
   transform: translateY(-2px);
+}
+
+.theme-btn:hover .el-icon {
+  color: var(--primary-color);
 }
 
 .theme-btn .el-icon {
   font-size: 18px;
+  color: var(--text-secondary);
+  transition: color 200ms ease;
+}
+
+/* Dark mode theme button */
+[data-theme="dark"] .theme-btn {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .theme-btn:hover {
+  background: var(--primary-gradient-subtle);
+}
+
+[data-theme="dark"] .theme-btn:hover .el-icon {
+  color: var(--primary-color);
 }
 
 /* Main Content */
