@@ -117,9 +117,11 @@
       <!-- Main Content -->
       <el-main class="main-content">
         <router-view v-slot="{ Component }">
-          <keep-alive>
-            <component :is="Component" />
-          </keep-alive>
+          <transition name="fade-scale" mode="out-in">
+            <keep-alive>
+              <component :is="Component" :key="$route.path" />
+            </keep-alive>
+          </transition>
         </router-view>
       </el-main>
     </el-container>
