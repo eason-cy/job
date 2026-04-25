@@ -1,18 +1,28 @@
 ﻿<template>
   <div class="interview-records">
     <div class="panel stats-panel">
-      <div class="stat-item">
-        <span>记录总数</span>
-        <strong>{{ tableData.length }}</strong>
-      </div>
-      <div class="stat-item">
-        <span>待复盘</span>
-        <strong>{{ needReviewCount }}</strong>
-      </div>
+      <template v-if="dataLoaded">
+        <div class="stat-item">
+          <span>记录总数</span>
+          <strong>{{ tableData.length }}</strong>
+        </div>
+        <div class="stat-item">
+          <span>待复盘</span>
+          <strong>{{ needReviewCount }}</strong>
+        </div>
+      </template>
+      <template v-else>
+        <el-skeleton animated v-for="i in 2" :key="i">
+          <template #template>
+            <el-skeleton-item variant="text" style="width:60px;height:20px" />
+            <el-skeleton-item variant="text" style="width:80px;height:24px;margin-left:auto" />
+          </template>
+        </el-skeleton>
+      </template>
     </div>
 
     <div class="panel">
-      <el-form :inline="true" class="search-form">
+      <el-form v-if="dataLoaded" :inline="true" class="search-form">
         <el-form-item label="公司">
           <el-select v-model="searchForm.companyName" placeholder="全部" clearable filterable>
             <el-option v-for="c in companies" :key="c" :label="c" :value="c" />
@@ -40,7 +50,7 @@
     </div>
 
     <div class="panel">
-      <el-table v-loading="tableLoading && tableData.length > 0" element-loading-text="加载中..." :data="tableData" stripe row-key="id" table-layout="auto">
+      <el-table v-if="dataLoaded" v-loading="tableLoading" element-loading-text="加载中..." :data="tableData" stripe row-key="id" table-layout="auto">
         <el-table-column prop="companyName" label="公司" width="140" />
         <el-table-column prop="position" label="岗位" width="130" />
         <el-table-column prop="round" label="轮次" width="80" />
@@ -66,6 +76,10 @@
         </el-table-column>
         <el-table-column prop="reviewCount" label="复盘次数" width="90" />
       </el-table>
+
+      <div v-if="!dataLoaded" class="skeleton-table">
+        <el-skeleton animated :rows="10" />
+      </div>
     </div>
 
     <el-dialog v-model="detailVisible" title="面试详情" width="760px" destroy-on-close>
@@ -95,6 +109,7 @@ import { usePersistentQueryState } from '../composables/usePersistentQueryState'
 import { logError } from '../utils/logger'
 
 const tableLoading = ref(false)
+const dataLoaded = ref(false)
 const tableData = ref([])
 const companies = ref([])
 const detailVisible = ref(false)
@@ -138,6 +153,7 @@ const fetchData = async () => {
     ElMessage.error('获取面试记录失败')
   } finally {
     tableLoading.value = false
+    dataLoaded.value = true
   }
 }
 
@@ -313,5 +329,9 @@ onMounted(async () => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.skeleton-table {
+  padding: 8px 0;
 }
 </style>
