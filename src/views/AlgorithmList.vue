@@ -1,24 +1,34 @@
 ﻿<template>
   <div class="algorithm-list">
     <div class="panel stats-panel">
-      <div class="stat-item">
-        <span>总题数</span>
-        <strong>{{ stats.total }}</strong>
-      </div>
-      <div class="stat-item">
-        <span>待复习</span>
-        <strong>{{ stats.needReview }}</strong>
-      </div>
-      <div class="stat-item">
-        <span>简/中/难</span>
-        <strong>{{ stats.byDifficulty.Easy }}/{{ stats.byDifficulty.Medium }}/{{ stats.byDifficulty.Hard }}</strong>
-      </div>
+      <template v-if="dataLoaded">
+        <div class="stat-item">
+          <span>总题数</span>
+          <strong>{{ stats.total }}</strong>
+        </div>
+        <div class="stat-item">
+          <span>待复习</span>
+          <strong>{{ stats.needReview }}</strong>
+        </div>
+        <div class="stat-item">
+          <span>简/中/难</span>
+          <strong>{{ stats.byDifficulty.Easy }}/{{ stats.byDifficulty.Medium }}/{{ stats.byDifficulty.Hard }}</strong>
+        </div>
+      </template>
+      <template v-else>
+        <el-skeleton animated v-for="i in 3" :key="i">
+          <template #template>
+            <el-skeleton-item variant="text" style="width:60px;height:20px" />
+            <el-skeleton-item variant="text" style="width:80px;height:24px;margin-left:auto" />
+          </template>
+        </el-skeleton>
+      </template>
     </div>
 
     <div class="panel">
-      <el-form :inline="true" class="search-form">
+      <el-form v-if="dataLoaded" :inline="true" class="search-form">
         <el-form-item label="关键词">
-          <el-input v-model="searchForm.keyword" placeholder="题号或标题" clearable @keyup.enter="handleSearch" />
+          <el-input v-model="searchKeyword" placeholder="题号或标题" clearable />
         </el-form-item>
         <el-form-item label="难度">
           <el-select v-model="searchForm.difficulty" placeholder="全部" clearable>
@@ -60,7 +70,7 @@
     </div>
 
     <div class="panel">
-      <el-table v-loading="tableLoading && tableData.length > 0" element-loading-text="加载中..." :data="tableData" stripe row-key="id" table-layout="auto">
+      <el-table v-if="dataLoaded" v-loading="tableLoading" element-loading-text="加载中..." :data="tableData" stripe row-key="id" table-layout="auto">
         <el-table-column prop="leetcodeId" label="题号" width="90" />
         <el-table-column label="题目" min-width="220">
           <template #default="{ row }">
@@ -97,7 +107,11 @@
         </el-table-column>
       </el-table>
 
-      <div class="pagination-wrap">
+      <div v-if="!dataLoaded" class="skeleton-table">
+        <el-skeleton animated :rows="10" />
+      </div>
+
+      <div v-if="dataLoaded" class="pagination-wrap">
         <el-pagination
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.size"
@@ -155,7 +169,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { watch, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
 import { algorithmApi } from '../api'
@@ -163,6 +177,9 @@ import { usePersistentQueryState } from '../composables/usePersistentQueryState'
 import { logError } from '../utils/logger'
 
 const tableLoading = ref(false)
+const searchKeyword = ref('')
+let searchDebounceTimer = null
+const dataLoaded = ref(false)
 const tableData = ref([])
 const allTags = ref([])
 const stats = ref({
@@ -185,6 +202,16 @@ const pagination = reactive({
 })
 
 const { load: loadQueryState } = usePersistentQueryState('job_tracker_algorithm_query', searchForm, pagination)
+
+// 搜索防抖
+watch(searchKeyword, (val) => {
+  clearTimeout(searchDebounceTimer)
+  searchDebounceTimer = setTimeout(() => {
+    searchForm.keyword = val
+    pagination.page = 1
+    fetchData()
+  }, 300)
+})
 
 const dialogVisible = ref(false)
 const detailVisible = ref(false)
@@ -257,6 +284,7 @@ const fetchData = async () => {
     ElMessage.error('获取算法列表失败')
   } finally {
     tableLoading.value = false
+    dataLoaded.value = true
   }
 }
 
@@ -266,6 +294,7 @@ const handleSearch = () => {
 }
 
 const resetSearch = () => {
+  searchKeyword.value = ''
   searchForm.keyword = ''
   searchForm.difficulty = ''
   searchForm.familiarity = ''
@@ -526,5 +555,9 @@ onMounted(async () => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.skeleton-table {
+  padding: 8px 0;
 }
 </style>
