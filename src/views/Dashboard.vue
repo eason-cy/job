@@ -7,17 +7,28 @@
         <span class="section-desc">实时追踪你的投递进度</span>
       </div>
       <div class="stats-grid">
+        <!-- 骨架屏 -->
+        <div v-if="!dataLoaded" v-for="i in 6" :key="'sk-' + i" class="stat-card">
+          <el-skeleton animated>
+            <template #template>
+              <el-skeleton-item variant="circle" style="width:44px;height:44px" />
+              <el-skeleton-item variant="text" style="width:50px;height:28px;margin-left:14px" />
+            </template>
+          </el-skeleton>
+        </div>
+        <!-- 动画数字 -->
         <div
-          v-for="(item, index) in statusStats"
+          v-for="(item, index) in animatedCount"
+          v-else
           :key="item.status"
           class="stat-card"
-          :class="{ 'stat-card--highlight': index === 4 && item.count > 0 }"
+          :class="{ 'stat-card--highlight': index === 4 && item.count.value > 0 }"
         >
           <div class="stat-card__icon" :style="{ background: item.gradient }">
             <el-icon><component :is="item.icon" /></el-icon>
           </div>
           <div class="stat-card__body">
-            <span class="stat-card__value">{{ item.count }}</span>
+            <span class="stat-card__value">{{ item.count.value }}</span>
             <span class="stat-card__label">{{ item.label }}</span>
           </div>
         </div>
@@ -112,7 +123,14 @@
         <div class="section-header">
           <h2>状态分布</h2>
         </div>
-        <div ref="pieChartRef" class="chart-container"></div>
+        <div v-if="!dataLoaded" class="chart-skeleton">
+          <el-skeleton animated>
+            <template #template>
+              <el-skeleton-item variant="circle" style="width:200px;height:200px;margin:20px auto" />
+            </template>
+          </el-skeleton>
+        </div>
+        <div v-else ref="pieChartRef" class="chart-container"></div>
       </section>
     </div>
   </div>
@@ -135,6 +153,7 @@ use([PieChart, TooltipComponent, LegendComponent, CanvasRenderer])
 
 const router = useRouter()
 const loading = ref(false)
+const dataLoaded = ref(false)
 const pieChartRef = ref(null)
 let pieChart = null
 
@@ -161,6 +180,46 @@ const statusStats = computed(() => {
     count: statistics.value.statusDistribution[item.status] || 0
   }))
 })
+
+// 数字缓动动画工具
+const useCountUp = (target, duration = 800) => {
+  const value = ref(0)
+  const animate = () => {
+    const start = performance.now()
+    const tick = (now) => {
+      const elapsed = now - start
+      const progress = Math.min(elapsed / duration, 1)
+      const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress)
+      value.value = Math.floor(eased * target)
+      if (progress < 1) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  }
+  return { value, animate }
+}
+
+// 动画数字 refs（数据加载后初始化）
+const animatedCount = ref([])
+
+const initAnimatedStats = () => {
+  const cfg = [
+    { status: '待处理', label: '待处理', icon: Clock, gradient: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)' },
+    { status: '测评中', label: '测评中', icon: EditPen, gradient: 'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)' },
+    { status: '笔试中', label: '笔试中', icon: Edit, gradient: 'linear-gradient(135deg, #6366f1 0%, #818cf8 100%)' },
+    { status: '面试中', label: '面试中', icon: ChatDotRound, gradient: 'linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%)' },
+    { status: '已offer', label: '已Offer', icon: Trophy, gradient: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)' },
+    { status: '已淘汰', label: '已淘汰', icon: CircleClose, gradient: 'linear-gradient(135deg, #64748b 0%, #94a3b8 100%)' }
+  ]
+  animatedCount.value = cfg.map((item) => {
+    const target = statistics.value.statusDistribution[item.status] || 0
+    const { value, animate } = useCountUp(target, 800)
+    return { ...item, count: value, animate }
+  })
+  // stagger 启动动画
+  animatedCount.value.forEach((item, i) => {
+    setTimeout(() => item.animate(), i * 80)
+  })
+}
 
 const getChartColors = () => ({
   '待处理': '#3b82f6',
@@ -224,6 +283,8 @@ const renderPieChart = () => {
   }))
 
   pieChart.setOption({
+    animationDuration: 1000,
+    animationEasing: 'cubicOut',
     tooltip: {
       trigger: 'item',
       formatter: '{b}: {c} ({d}%)',
@@ -265,12 +326,14 @@ const fetchStatistics = async () => {
     ])
     statistics.value = statsResp.data
     todoItems.value = buildTodoItems(interviewsResp.data || [])
+    initAnimatedStats()
     renderPieChart()
   } catch (error) {
     logError('dashboard:statistics', error)
     ElMessage.error('获取统计信息失败')
   } finally {
     loading.value = false
+    dataLoaded.value = true
   }
 }
 
@@ -631,6 +694,13 @@ onUnmounted(() => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.chart-skeleton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 280px;
 }
 
 /* ========== 响应式布局 ========== */
