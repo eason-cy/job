@@ -435,6 +435,7 @@ const handleSearch = () => {
 }
 
 const resetSearch = () => {
+  clearTimeout(searchDebounceTimer)
   searchInput.value = ''
   searchForm.companyName = ''
   searchForm.status = ''
@@ -691,6 +692,7 @@ const deleteInterview = async (row) => {
 
 onMounted(async () => {
   loadQueryState()
+  searchInput.value = searchForm.companyName
   // 非阻塞加载数据，避免首次进入显示loading旋转
   fetchData().then(() => {
     openDetailFromRouteQuery()

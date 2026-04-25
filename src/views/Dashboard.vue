@@ -137,7 +137,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { use } from 'echarts/core'
 import { PieChart } from 'echarts/charts'
@@ -166,24 +166,10 @@ const statistics = ref({
 
 const todoItems = ref([])
 
-const statusStats = computed(() => {
-  const cfg = [
-    { status: '待处理', label: '待处理', icon: Clock, gradient: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)' },
-    { status: '测评中', label: '测评中', icon: EditPen, gradient: 'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)' },
-    { status: '笔试中', label: '笔试中', icon: Edit, gradient: 'linear-gradient(135deg, #6366f1 0%, #818cf8 100%)' },
-    { status: '面试中', label: '面试中', icon: ChatDotRound, gradient: 'linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%)' },
-    { status: '已offer', label: '已Offer', icon: Trophy, gradient: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)' },
-    { status: '已淘汰', label: '已淘汰', icon: CircleClose, gradient: 'linear-gradient(135deg, #64748b 0%, #94a3b8 100%)' }
-  ]
-  return cfg.map((item) => ({
-    ...item,
-    count: statistics.value.statusDistribution[item.status] || 0
-  }))
-})
-
 // 数字缓动动画工具
 const useCountUp = (target, duration = 800) => {
   const value = ref(0)
+  let rafId = null
   const animate = () => {
     const start = performance.now()
     const tick = (now) => {
@@ -191,17 +177,21 @@ const useCountUp = (target, duration = 800) => {
       const progress = Math.min(elapsed / duration, 1)
       const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress)
       value.value = Math.floor(eased * target)
-      if (progress < 1) requestAnimationFrame(tick)
+      if (progress < 1) rafId = requestAnimationFrame(tick)
     }
-    requestAnimationFrame(tick)
+    rafId = requestAnimationFrame(tick)
   }
-  return { value, animate }
+  const cancel = () => { if (rafId) cancelAnimationFrame(rafId) }
+  return { value, animate, cancel }
 }
 
 // 动画数字 refs（数据加载后初始化）
 const animatedCount = ref([])
 
 const initAnimatedStats = () => {
+  // 取消旧的动画循环
+  animatedCount.value.forEach(item => item.cancel())
+
   const cfg = [
     { status: '待处理', label: '待处理', icon: Clock, gradient: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)' },
     { status: '测评中', label: '测评中', icon: EditPen, gradient: 'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)' },
@@ -212,8 +202,8 @@ const initAnimatedStats = () => {
   ]
   animatedCount.value = cfg.map((item) => {
     const target = statistics.value.statusDistribution[item.status] || 0
-    const { value, animate } = useCountUp(target, 800)
-    return { ...item, count: value, animate }
+    const { value, animate, cancel } = useCountUp(target, 800)
+    return { ...item, count: value, animate, cancel }
   })
   // stagger 启动动画
   animatedCount.value.forEach((item, i) => {

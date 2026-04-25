@@ -294,6 +294,7 @@ const handleSearch = () => {
 }
 
 const resetSearch = () => {
+  clearTimeout(searchDebounceTimer)
   searchKeyword.value = ''
   searchForm.keyword = ''
   searchForm.difficulty = ''
@@ -406,6 +407,7 @@ const incrementReview = async (row) => {
 
 onMounted(async () => {
   loadQueryState()
+  searchKeyword.value = searchForm.keyword
   // 非阻塞加载，避免首次进入显示loading旋转
   Promise.all([fetchData(), fetchStats(), fetchTags()])
 })
