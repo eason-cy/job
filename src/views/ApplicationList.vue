@@ -1,13 +1,12 @@
 ﻿<template>
   <div class="application-list">
     <div class="search-section">
-      <el-form :inline="true" class="search-form">
+      <el-form v-if="dataLoaded" :inline="true" class="search-form">
         <el-form-item label="公司名称">
           <el-input
-            v-model="searchForm.companyName"
+            v-model="searchInput"
             placeholder="搜索公司..."
             clearable
-            @keyup.enter="handleSearch"
           />
         </el-form-item>
         <el-form-item label="状态">
@@ -27,11 +26,15 @@
           </el-button>
         </el-form-item>
       </el-form>
+      <div v-else class="skeleton-form">
+        <el-skeleton animated :rows="2" />
+      </div>
     </div>
 
     <div class="table-section">
       <el-table
-        v-loading="tableLoading && tableData.length > 0"
+        v-if="dataLoaded"
+        v-loading="tableLoading"
         element-loading-text="加载中..."
         :data="tableData"
         stripe
@@ -94,7 +97,11 @@
         </el-table-column>
       </el-table>
 
-      <div class="pagination-wrap">
+      <div v-if="!dataLoaded" class="skeleton-table">
+        <el-skeleton animated :rows="10" />
+      </div>
+
+      <div v-if="dataLoaded" class="pagination-wrap">
         <el-pagination
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.size"
@@ -284,7 +291,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { watch, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Link, Plus, Search, Star } from '@element-plus/icons-vue'
@@ -302,6 +309,9 @@ const searchForm = reactive({
   status: ''
 })
 
+const searchInput = ref('')
+let searchDebounceTimer = null
+
 const pagination = reactive({
   page: 1,
   size: 16,
@@ -310,7 +320,18 @@ const pagination = reactive({
 
 const { load: loadQueryState } = usePersistentQueryState('job_tracker_application_query', searchForm, pagination)
 
+// 搜索防抖：输入停止 300ms 后才触发查询
+watch(searchInput, (val) => {
+  clearTimeout(searchDebounceTimer)
+  searchDebounceTimer = setTimeout(() => {
+    searchForm.companyName = val
+    pagination.page = 1
+    fetchData()
+  }, 300)
+})
+
 const tableLoading = ref(false)
+const dataLoaded = ref(false)
 const tableData = ref([])
 
 const dialogVisible = ref(false)
@@ -404,6 +425,7 @@ const fetchData = async () => {
     ElMessage.error('获取投递列表失败')
   } finally {
     tableLoading.value = false
+    dataLoaded.value = true
   }
 }
 
@@ -413,6 +435,7 @@ const handleSearch = () => {
 }
 
 const resetSearch = () => {
+  searchInput.value = ''
   searchForm.companyName = ''
   searchForm.status = ''
   pagination.page = 1
@@ -889,5 +912,13 @@ onMounted(async () => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.skeleton-form {
+  padding: 8px 0;
+}
+
+.skeleton-table {
+  padding: 8px 0;
 }
 </style>
