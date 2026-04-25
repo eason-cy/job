@@ -1,22 +1,32 @@
 ﻿<template>
   <div class="bagu-list">
     <div class="panel stats-panel">
-      <div class="stat-item">
-        <span>总题数</span>
-        <strong>{{ stats.total }}</strong>
-      </div>
-      <div class="stat-item">
-        <span>待复习</span>
-        <strong>{{ stats.needReview }}</strong>
-      </div>
-      <div class="stat-item">
-        <span>分类数</span>
-        <strong>{{ categories.length }}</strong>
-      </div>
+      <template v-if="dataLoaded">
+        <div class="stat-item">
+          <span>总题数</span>
+          <strong>{{ stats.total }}</strong>
+        </div>
+        <div class="stat-item">
+          <span>待复习</span>
+          <strong>{{ stats.needReview }}</strong>
+        </div>
+        <div class="stat-item">
+          <span>分类数</span>
+          <strong>{{ categories.length }}</strong>
+        </div>
+      </template>
+      <template v-else>
+        <el-skeleton animated v-for="i in 3" :key="i">
+          <template #template>
+            <el-skeleton-item variant="text" style="width:60px;height:20px" />
+            <el-skeleton-item variant="text" style="width:80px;height:24px;margin-left:auto" />
+          </template>
+        </el-skeleton>
+      </template>
     </div>
 
     <div class="panel">
-      <el-form :inline="true" class="search-form">
+      <el-form v-if="dataLoaded" :inline="true" class="search-form">
         <el-form-item label="关键词">
           <el-input v-model="searchForm.keyword" placeholder="问题/答案关键词" clearable @keyup.enter="handleSearch" />
         </el-form-item>
@@ -51,7 +61,7 @@
     </div>
 
     <div class="panel">
-      <el-table v-loading="tableLoading && tableData.length > 0" element-loading-text="加载中..." :data="tableData" stripe row-key="id" table-layout="auto">
+      <el-table v-if="dataLoaded" v-loading="tableLoading" element-loading-text="加载中..." :data="tableData" stripe row-key="id" table-layout="auto">
         <el-table-column prop="category" label="分类" width="120" />
         <el-table-column label="问题" min-width="260">
           <template #default="{ row }">
@@ -78,7 +88,11 @@
         </el-table-column>
       </el-table>
 
-      <div class="pagination-wrap">
+      <div v-if="!dataLoaded" class="skeleton-table">
+        <el-skeleton animated :rows="10" />
+      </div>
+
+      <div v-if="dataLoaded" class="pagination-wrap">
         <el-pagination
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.size"
@@ -132,6 +146,7 @@ import { usePersistentQueryState } from '../composables/usePersistentQueryState'
 import { logError } from '../utils/logger'
 
 const tableLoading = ref(false)
+const dataLoaded = ref(false)
 const tableData = ref([])
 const categories = ref([])
 const stats = ref({
@@ -206,6 +221,7 @@ const fetchData = async () => {
     ElMessage.error('获取八股题列表失败')
   } finally {
     tableLoading.value = false
+    dataLoaded.value = true
   }
 }
 
@@ -453,5 +469,9 @@ onMounted(async () => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.skeleton-table {
+  padding: 8px 0;
 }
 </style>
