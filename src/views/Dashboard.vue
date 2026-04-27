@@ -137,7 +137,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { use } from 'echarts/core'
 import { PieChart } from 'echarts/charts'
@@ -324,6 +324,8 @@ const fetchStatistics = async () => {
   } finally {
     loading.value = false
     dataLoaded.value = true
+    // Wait for DOM to mount chart container before rendering
+    nextTick(() => renderPieChart())
   }
 }
 
